@@ -138,6 +138,12 @@ test('hast-util-to-text', function(t) {
     'should ignore closed dialogs'
   )
 
+  t.equal(
+    toText(h('p', ['Zulu\t', h('span', 'zulu'), '  \t zulu.'])),
+    'Zulu zulu zulu.',
+    'should support white-space around elements'
+  )
+
   t.test('normal white-space', function(st) {
     st.equal(
       toText(h('p', 'Alpha   bravo  charlie.')),
