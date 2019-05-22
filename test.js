@@ -138,6 +138,12 @@ test('hast-util-to-text', function(t) {
     'should ignore closed dialogs'
   )
 
+  t.equal(
+    toText(h('p', ['Zulu\t', h('span', 'zulu'), '  \t zulu.'])),
+    'Zulu zulu zulu.',
+    'should support white-space around elements'
+  )
+
   t.test('normal white-space', function(st) {
     st.equal(
       toText(h('p', 'Alpha   bravo  charlie.')),
@@ -223,6 +229,18 @@ test('hast-util-to-text', function(t) {
       toText(h('p', '\u200B \n Alpha\u200B \n\n\u200Bbravo\n\u200Bcharlie.')),
       '\u200BAlpha​\u200Bbravo\u200Bcharlie.',
       'should not collapse line feeds to a space if they’re surrounded by a zero width space'
+    )
+
+    t.equal(
+      toText(h('div', h('p', ['Delta.  ', h('br')]))),
+      'Delta.\n',
+      'should support trim white-space before a `<br>` (#1)'
+    )
+
+    t.equal(
+      toText(h('p', ['Delta.  ', h('br')])),
+      'Delta.\n',
+      'should support trim white-space before a `<br>` (#2)'
     )
 
     st.end()
