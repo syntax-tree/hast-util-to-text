@@ -254,6 +254,32 @@ test('hast-util-to-text', function(t) {
     )
 
     st.equal(
+      toText(
+        h('pre', {wrap: true}, ['\tAlpha \n\tbravo', h('br'), 'charlie()'])
+      ),
+      '\tAlpha \n\tbravo\ncharlie()',
+      'should support `[wrap]` on a `pre` element'
+    )
+
+    st.equal(
+      toText(h('listing', '\tAlpha \n\tbravo.')),
+      '\tAlpha \n\tbravo.',
+      'should support a `listing` element'
+    )
+
+    st.equal(
+      toText(h('td', {noWrap: true}, '\tAlpha \n\tbravo.')),
+      '\tAlpha \n\tbravo.',
+      'should support `[nowrap]` on a `td` element'
+    )
+
+    st.equal(
+      toText(h('nobr', '\tAlpha \n\tbravo.')),
+      '\tAlpha \n\tbravo.',
+      'should support a `nobr` element'
+    )
+
+    st.equal(
       toText(h('textarea', '\tDelta \n\techo\t\n')),
       '\tDelta \n\techo\t\n',
       'should support a `textarea` element'

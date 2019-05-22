@@ -444,20 +444,27 @@ function trimAndcollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   }
 }
 
-// We don’t support non-conforming legacy features:
-//
-// *   `pre[wrap]` -> `pre-wrap`
-// *   `listing`, `plaintext`, `xmp` -> `pre`
-// *   `nobr`, `td[nowrap]`, `th[nowrap]` -> `nowrap`
-// *   `nobr wbr` -> `normal`
+// We don’t support void elements here (so `nobr wbr` -> `normal` is ignored).
 function inferWhiteSpace(node, options) {
+  var props = node.properties || {}
+  var inherit = options.whiteSpace || 'normal'
+
   switch (node.tagName) {
-    case 'pre':
+    case 'listing':
+    case 'plaintext':
+    case 'xmp':
       return 'pre'
+    case 'nobr':
+      return 'nowrap'
+    case 'pre':
+      return props.wrap ? 'pre-wrap' : 'pre'
+    case 'td':
+    case 'th':
+      return props.noWrap ? 'nowrap' : inherit
     case 'textarea':
       return 'pre-wrap'
     default:
-      return options.whiteSpace || 'normal'
+      return inherit
   }
 }
 
@@ -490,7 +497,6 @@ function row(node) {
 }
 
 // See: <https://html.spec.whatwg.org/#the-css-user-agent-style-sheet-and-presentational-hints>
-// Note: Legacy elements and attributes are not supported.
 function blockOrCaption(node) {
   return is(node, [
     'caption', // `table-caption`
@@ -500,6 +506,7 @@ function blockOrCaption(node) {
     // Flow content
     'address',
     'blockquote',
+    'center', // Legacy
     'dialog',
     'div',
     'figure',
@@ -509,9 +516,12 @@ function blockOrCaption(node) {
     'header',
     'hr',
     'legend',
+    'listing', // Legacy
     'main',
     'p',
+    'plaintext', // Legacy
     'pre',
+    'xmp', // Legacy
     // Sections and headings
     'article',
     'aside',
@@ -525,6 +535,7 @@ function blockOrCaption(node) {
     'nav',
     'section',
     // Lists
+    'dir', // Legacy
     'dd',
     'dl',
     'dt',

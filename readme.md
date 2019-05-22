@@ -80,8 +80,7 @@ Get the plain-text value of a [node][].
 *   A line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
     or Halfwidth East Asian Width characters are used, the same goes for a case
     with Chinese, Japanese, or Yi writing systems
-*   Replaced elements and legacy elements (like `listing`, `plaintext`) are
-    treated like normal elements
+*   Replaced elements are treated like normal elements
 
 ## Related
 
