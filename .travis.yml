@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - lts/dubnium
+  - node
+after_script: bash <(curl -s https://codecov.io/bash)
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: UfisvscGt+wf6fpQ7LM10FlRlHrvByTQO52bxL7vHqjP2XcDfYXR559/mTYD/q0Wd+QB6qqysYFEFGL9cDc8pjeMUb1qknvO0KzmE/nv3wrn1Lq5MSpzFIGevMxvX3gbZ9YXlG/n6H8leMr5qlfdPpd2tvWPDDnscbMZ1biZlOAxr9DL9PqcZe7ZBd+l4f4IdrViTnMMOtvu3X6tqqgJ2hdNB15PgifKGchEjsvoJQzATH51PWumi077agYd0WRg6XtSAOWc09NkgUxpg76dfPvuLyXkMzV/P4CQ6r/GzqHRydlqyQlz951QyfAHfFvQE0TMsyZ92ssNqnsyUnVL2oNdOLQ+iOFCQ+04qI++nu9c7Cn1jBRaEjEt/6JFjGswMEJ90mjG7IKBatnWhhfQRsXct0Dccg+FcooHwwCfCzEryincvN+gzTTu0isNSv4V/nJI4YSVutbCyF/KdYx8fY8xtwCeSyYH2LY0og+YkKd5sqbqWBOP1NkxEfcQiPTvYdH62Om2P8zPAZ48ctsUSX6shgjVtcrk9IBERlIO7RyOWIgWw7W+Y+yheotnNVn+pfBwStCrMXQq9ZMwL8NcUembuBSEWyoes22+wPm+SwdC+S8P7g3Ce8fDQKHOvgBYz95uaf94cYG04p1hNST5U0oNQe674kdVd78FCt+fJ5I=
+  file:
+    - 'hast-util-to-text.js'
+    - 'hast-util-to-text.min.js'
+  on:
+    tags: true
