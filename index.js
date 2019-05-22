@@ -41,8 +41,9 @@ var spaceChar = ' '
 function toText(node) {
   var children = node.children || []
   var length = children.length
+  var block = blockOrCaption(node)
+  var whiteSpace = inferWhiteSpace(node, {})
   var index = -1
-  var options = {whiteSpace: inferWhiteSpace(node, {})}
   var results
   var current
   var result
@@ -58,7 +59,11 @@ function toText(node) {
   // Nodes without children are treated as a void element, so `doctype` is thus
   // ignored.
   if (node.type === 'text' || node.type === 'comment') {
-    return collectText(node)
+    return collectText(node, {
+      whiteSpace: whiteSpace,
+      breakBefore: true,
+      breakAfter: true
+    })
   }
 
   // 1.  If this element is not being rendered, or if the user agent is a
@@ -80,7 +85,11 @@ function toText(node) {
     //      collection steps with node.
     //      Each item in results will either be a JavaScript string or a
     //      positive integer (a required line break count).
-    current = innerTextCollection(children[index], index, node, options)
+    current = innerTextCollection(children[index], index, node, {
+      whiteSpace: whiteSpace,
+      breakBefore: index === 0 ? block : false,
+      breakAfter: index === length - 1 ? block : is(children[index + 1], 'br')
+    })
 
     // 3.2. For each item item in current, append item to results.
     results = results.concat(current)
@@ -126,7 +135,9 @@ function innerTextCollection(node, index, parent, options) {
 
   if (node.type === 'text') {
     return [
-      options.whiteSpace === 'normal' ? collectText(node) : collectPreText(node)
+      options.whiteSpace === 'normal'
+        ? collectText(node, options)
+        : collectPreText(node, options)
     ]
   }
 
@@ -136,11 +147,14 @@ function innerTextCollection(node, index, parent, options) {
 // Collect an element.
 function collectElement(node, index, parent, options) {
   // First we infer the `white-space` property.
-  var settings = {whiteSpace: inferWhiteSpace(node, options)}
+  var whiteSpace = inferWhiteSpace(node, options)
   var children = node.children || []
   var length = children.length
   var offset = -1
   var items = []
+  var current
+  var prefix
+  var suffix
 
   // We’re ignoring point 3, and exiting without any content here, because we
   // deviated from the spec in `toText` at step 3.
@@ -148,14 +162,8 @@ function collectElement(node, index, parent, options) {
     return items
   }
 
-  // 1.  Let items be the result of running the inner text collection steps with
-  //     each child node of node in tree order, and then concatenating the
-  //     results to a single list.
-  while (++offset < length) {
-    items = items.concat(
-      innerTextCollection(children[offset], offset, node, settings)
-    )
-  }
+  // Note: we first detect if there is going to be a break before or after the
+  // contents, as that changes the white-space handling.
 
   // 2.  If node’s computed value of `visibility` is not `visible`, then return
   //     items.
@@ -166,36 +174,12 @@ function collectElement(node, index, parent, options) {
   //
   //     Note: We already did this above.
 
-  // 4.  If node is a Text node, then for each CSS text box produced by node,
-  //     in content order, compute the text of the box after application of the
-  //     CSS `white-space` processing rules and `text-transform` rules, set
-  //     items to the list of the resulting strings, and return items.
-  //     The CSS `white-space` processing rules are slightly modified:
-  //     collapsible spaces at the end of lines are always collapsed, but they
-  //     are only removed if the line is the last line of the block, or it ends
-  //     with a br element.
-  //     Soft hyphens should be preserved.
-  //
-  //     Note: See `collectText` and `collectPreText`.
-  //     Note: we don’t deal with `text-transform`, no element has that by
-  //     default.
-  //     Note: I don’t understand the last line, as we’re dealing with text
-  //     here, there’s no `<br>` elements.
+  // See `collectText` for step 4.
 
   // 5.  If node is a `<br>` element, then append a string containing a single
   //     U+000A LINE FEED (LF) character to items.
   if (is(node, 'br')) {
-    items.push(lineFeedChar)
-  }
-
-  // 6.  If node’s computed value of `display` is `table-cell`, and node’s CSS
-  //     box is not the last `table-cell` box of its enclosing `table-row` box,
-  //     then append a string containing a single U+0009 CHARACTER TABULATION
-  //     (tab) character to items.
-  //
-  //     See: <https://html.spec.whatwg.org/#tables-2>
-  else if (cell(node) && findAfter(parent, node, cell)) {
-    items.push(tabChar)
+    suffix = lineFeedChar
   }
 
   // 7.  If node’s computed value of `display` is `table-row`, and node’s CSS
@@ -207,27 +191,78 @@ function collectElement(node, index, parent, options) {
   //     Note: needs further investigation as this does not account for implicit
   //     rows.
   else if (row(node) && findAfter(parent, node, row)) {
-    items.push(lineFeedChar)
+    suffix = lineFeedChar
   }
 
   // 8.  If node is a `<p>` element, then append 2 (a required line break count)
   //     at the beginning and end of items.
   else if (is(node, 'p')) {
-    items = [2].concat(items, 2)
+    prefix = 2
+    suffix = 2
   }
 
   // 9.  If node’s used value of `display` is block-level or `table-caption`,
   //     then append 1 (a required line break count) at the beginning and end of
   //     items.
   else if (blockOrCaption(node)) {
-    items = [1].concat(items, 1)
+    prefix = 1
+    suffix = 1
+  }
+
+  // 1.  Let items be the result of running the inner text collection steps with
+  //     each child node of node in tree order, and then concatenating the
+  //     results to a single list.
+  while (++offset < length) {
+    current = innerTextCollection(children[offset], offset, node, {
+      whiteSpace: whiteSpace,
+      breakBefore: offset === 0 ? prefix : false,
+      breakAfter:
+        offset === length - 1 ? suffix : is(children[offset + 1], 'br')
+    })
+
+    items = items.concat(current)
+  }
+
+  // 6.  If node’s computed value of `display` is `table-cell`, and node’s CSS
+  //     box is not the last `table-cell` box of its enclosing `table-row` box,
+  //     then append a string containing a single U+0009 CHARACTER TABULATION
+  //     (tab) character to items.
+  //
+  //     See: <https://html.spec.whatwg.org/#tables-2>
+  if (cell(node) && findAfter(parent, node, cell)) {
+    items.push(tabChar)
+  }
+
+  // Add the pre- and suffix.
+  if (prefix) {
+    items.unshift(prefix)
+  }
+
+  if (suffix) {
+    items.push(suffix)
   }
 
   return items
 }
 
+// 4.  If node is a Text node, then for each CSS text box produced by node,
+//     in content order, compute the text of the box after application of the
+//     CSS `white-space` processing rules and `text-transform` rules, set
+//     items to the list of the resulting strings, and return items.
+//     The CSS `white-space` processing rules are slightly modified:
+//     collapsible spaces at the end of lines are always collapsed, but they
+//     are only removed if the line is the last line of the block, or it ends
+//     with a br element.
+//     Soft hyphens should be preserved.
+//
+//     Note: See `collectText` and `collectPreText`.
+//     Note: we don’t deal with `text-transform`, no element has that by
+//     default.
+//
 // See: <https://drafts.csswg.org/css-text/#white-space-phase-1>
-function collectText(node) {
+function collectText(node, options) {
+  var breakBefore = options.breakBefore
+  var breakAfter = options.breakAfter
   var value = String(node.value)
   var index = -1
   var length = value.length
@@ -252,7 +287,7 @@ function collectText(node) {
 
     // Any sequence of collapsible spaces and tabs immediately preceding or
     // following a segment break is removed.
-    line = trimAndcollapseSpacesAndTabs(line)
+    line = trimAndcollapseSpacesAndTabs(line, breakBefore, breakAfter)
 
     // Add the line.
     lines.push(line)
@@ -348,14 +383,14 @@ function removeBidiControlCharacters(value) {
 //     space, provided both spaces are within the same inline formatting
 //     context—is collapsed to have zero advance width. (It is invisible,
 //     but retains its soft wrap opportunity, if any.)
-function trimAndcollapseSpacesAndTabs(value) {
+function trimAndcollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   var start = 0
   var end
   var length = value.length
   var result = []
   var char
 
-  // Move forward pas initial white space.
+  // Move forward past initial white space.
   while (start <= length) {
     char = value.charCodeAt(start)
 
@@ -364,6 +399,12 @@ function trimAndcollapseSpacesAndTabs(value) {
     }
 
     start++
+  }
+
+  // If we’re not directly after a segment break, but there was white space,
+  // add an empty value that will be turned into a space.
+  if (start !== 0 && !breakBefore) {
+    result.push('')
   }
 
   end = next(start - 1)
@@ -381,6 +422,13 @@ function trimAndcollapseSpacesAndTabs(value) {
       }
 
       start++
+    }
+
+    // If we reached the end, there was trailing white space, and there’s no
+    // segment break after this node, add an empty value that will be turned
+    // into a space.
+    if (start === length && start !== end && !breakAfter) {
+      result.push('')
     }
 
     end = next(start)

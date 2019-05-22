@@ -231,6 +231,18 @@ test('hast-util-to-text', function(t) {
       'should not collapse line feeds to a space if they’re surrounded by a zero width space'
     )
 
+    t.equal(
+      toText(h('div', h('p', ['Delta.  ', h('br')]))),
+      'Delta.\n',
+      'should support trim white-space before a `<br>` (#1)'
+    )
+
+    t.equal(
+      toText(h('p', ['Delta.  ', h('br')])),
+      'Delta.\n',
+      'should support trim white-space before a `<br>` (#2)'
+    )
+
     st.end()
   })
 
