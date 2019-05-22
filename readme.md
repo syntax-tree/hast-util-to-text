@@ -74,7 +74,7 @@ Get the plain-text value of a [node][].
 ###### Notes
 
 *   If an element is given that is not displayed (like a `head`), we’ll still
-    use the innerText algorithm instead of switching to `textContent`
+    use the `innerText` algorithm instead of switching to `textContent`
 *   If child elements are not displayed, they will be ignored
 *   CSS is not taken into account, except for the default user agent style sheet
 *   A line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
