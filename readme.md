@@ -120,9 +120,9 @@ abide by its terms.
 
 [downloads]: https://www.npmjs.com/package/hast-util-to-text
 
-[size-badge]: https://img.shields.io/bundlephobia/minzip/unist-util-position.svg
+[size-badge]: https://img.shields.io/bundlephobia/minzip/hast-util-to-text.svg
 
-[size]: https://bundlephobia.com/result?p=unist-util-position
+[size]: https://bundlephobia.com/result?p=hast-util-to-text
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
