@@ -8,7 +8,8 @@
 [![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-Get the plain-text value of a [hast][] node.
+[**hast**][hast] utility to get the plain-text value of a [*node*][node].
+
 This is like the DOMs `Node#innerText` getter but there are some deviations from
 the spec.
 The resulting text is returned.
@@ -55,13 +56,13 @@ Delta echo foxtrot.
 
 ### `toText(node)`
 
-Get the plain-text value of a [node][].
+Utility to get the plain-text value of a [*node*][node].
 
-*   If `node` is a comment, returns its `value`
-*   If `node` is a text, applies normal white-space collapsing to its `value`,
-    as defined by the [CSS Text][css] spec
-*   If `node` is a root or element, applies an algorithm similar to the
-    `innerText` getter as defined by [HTML][]
+*   If `node` is a [*comment*][comment], returns its `value`
+*   If `node` is a [*text*][text], applies normal white-space collapsing to its
+    `value`, as defined by the [CSS Text][css] spec
+*   If `node` is a [*root*][root] or [*element*][element], applies an algorithm
+    similar to the `innerText` getter as defined by [HTML][]
 
 ###### Parameters
 
@@ -73,14 +74,17 @@ Get the plain-text value of a [node][].
 
 ###### Notes
 
-*   If an element is given that is not displayed (like a `head`), we’ll still
-    use the `innerText` algorithm instead of switching to `textContent`
-*   If child elements are not displayed, they will be ignored
-*   CSS is not taken into account, except for the default user agent style sheet
+*   If `node` is an [*element*][element] is given that is not displayed (such as
+    a `head`), we’ll still use the `innerText` algorithm instead of switching to
+    `textContent`
+*   If [*descendants*][descendant] of `node` are [*elements*][element] that are
+    not displayed, they are ignored
+*   CSS is not considered, except for the default user agent style sheet
 *   A line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
     or Halfwidth East Asian Width characters are used, the same goes for a case
     with Chinese, Japanese, or Yi writing systems
-*   Replaced elements are treated like normal elements
+*   Replaced [*elements*][element] (such as `audio`) are treated like
+    non-replaced *elements*
 
 ## Related
 
@@ -145,12 +149,22 @@ abide by its terms.
 
 [coc]: https://github.com/syntax-tree/.github/blob/master/code-of-conduct.md
 
-[hast]: https://github.com/syntax-tree/hast
-
 [html]: https://html.spec.whatwg.org/#the-innertext-idl-attribute
 
 [css]: https://drafts.csswg.org/css-text/#white-space-phase-1
 
+[to-string]: https://github.com/rehypejs/rehype-minify/tree/master/packages/hast-util-to-string
+
+[descendant]: https://github.com/syntax-tree/unist#descendant
+
+[hast]: https://github.com/syntax-tree/hast
+
 [node]: https://github.com/syntax-tree/hast#nodes
 
-[to-string]: https://github.com/rehypejs/rehype-minify/tree/master/packages/hast-util-to-string
+[root]: https://github.com/syntax-tree/hast#root
+
+[comment]: https://github.com/syntax-tree/hast#comment
+
+[text]: https://github.com/syntax-tree/hast#text
+
+[element]: https://github.com/syntax-tree/hast#element
