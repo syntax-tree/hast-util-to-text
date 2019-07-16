@@ -86,6 +86,11 @@ Utility to get the plain-text value of a [*node*][node].
 *   Replaced [*elements*][element] (such as `audio`) are treated like
     non-replaced *elements*
 
+## Security
+
+`hast-util-to-text` does not change the syntax tree so there are no
+openings for [cross-site scripting (XSS)][xss] attacks.
+
 ## Related
 
 *   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/master/packages/hast-util-to-string)
@@ -168,3 +173,5 @@ abide by its terms.
 [text]: https://github.com/syntax-tree/hast#text
 
 [element]: https://github.com/syntax-tree/hast#element
+
+[xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
