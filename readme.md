@@ -74,8 +74,8 @@ Utility to get the plain-text value of a [*node*][node].
 
 ###### Notes
 
-*   If `node` is an [*element*][element] is given that is not displayed (such as
-    a `head`), we’ll still use the `innerText` algorithm instead of switching to
+*   If `node` is an [*element*][element] that is not displayed (such as a
+    `head`), we’ll still use the `innerText` algorithm instead of switching to
     `textContent`
 *   If [*descendants*][descendant] of `node` are [*elements*][element] that are
     not displayed, they are ignored
