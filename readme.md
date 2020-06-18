@@ -93,11 +93,11 @@ openings for [cross-site scripting (XSS)][xss] attacks.
 
 ## Related
 
-*   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/master/packages/hast-util-to-string)
+*   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/HEAD/packages/hast-util-to-string)
     — Get the plain-text value (`textContent`)
 *   [`hast-util-from-text`](https://github.com/syntax-tree/hast-util-from-text)
     — Set the plain-text value (`innerText`)
-*   [`hast-util-from-string`](https://github.com/rehypejs/rehype-minify/tree/master/packages/hast-util-from-string)
+*   [`hast-util-from-string`](https://github.com/rehypejs/rehype-minify/tree/HEAD/packages/hast-util-from-string)
     — Set the plain-text value (`textContent`)
 
 ## Contribute
@@ -148,17 +148,17 @@ abide by its terms.
 
 [author]: https://wooorm.com
 
-[contributing]: https://github.com/syntax-tree/.github/blob/master/contributing.md
+[contributing]: https://github.com/syntax-tree/.github/blob/HEAD/contributing.md
 
-[support]: https://github.com/syntax-tree/.github/blob/master/support.md
+[support]: https://github.com/syntax-tree/.github/blob/HEAD/support.md
 
-[coc]: https://github.com/syntax-tree/.github/blob/master/code-of-conduct.md
+[coc]: https://github.com/syntax-tree/.github/blob/HEAD/code-of-conduct.md
 
 [html]: https://html.spec.whatwg.org/#the-innertext-idl-attribute
 
 [css]: https://drafts.csswg.org/css-text/#white-space-phase-1
 
-[to-string]: https://github.com/rehypejs/rehype-minify/tree/master/packages/hast-util-to-string
+[to-string]: https://github.com/rehypejs/rehype-minify/tree/HEAD/packages/hast-util-to-string
 
 [descendant]: https://github.com/syntax-tree/unist#descendant
 
