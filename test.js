@@ -5,7 +5,7 @@ var u = require('unist-builder')
 var h = require('hastscript')
 var toText = require('.')
 
-test('hast-util-to-text', function(t) {
+test('hast-util-to-text', function (t) {
   t.equal(
     toText(u('doctype', {name: 'html'})),
     '',
@@ -144,88 +144,88 @@ test('hast-util-to-text', function(t) {
     'should support white-space around elements'
   )
 
-  t.test('normal white-space', function(st) {
-    st.equal(
+  t.test('normal white-space', function (t) {
+    t.equal(
       toText(h('p', 'Alpha   bravo  charlie.')),
       'Alpha bravo charlie.',
       'should collapse spaces in text'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Delta\t\techo\tfoxtrot.')),
       'Delta echo foxtrot.',
       'should collapse tabs in text'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Golf \t  \thotel\t  india.')),
       'Golf hotel india.',
       'should collapse mixed spaces and tabs in text'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', '  Juliett kilo.')),
       'Juliett kilo.',
       'should drop initial spaces'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', '\t\tLima mike.')),
       'Lima mike.',
       'should drop initial tabs'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', '\t  \tNovember oscar.')),
       'November oscar.',
       'should drop initial mixed spaces and tabs'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Papa québec.  ')),
       'Papa québec.',
       'should drop final spaces'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Romeo sierra.\t\t')),
       'Romeo sierra.',
       'should drop final tabs'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Tango uniform.\t  \t')),
       'Tango uniform.',
       'should drop final mixed spaces and tabs'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Whiskey.')),
       'Whiskey.',
       'should not fail without spaces or tabs'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'X-ray \n\t\tyankee  \t\n\tzulu.')),
       'X-ray yankee zulu.',
       'should ignore spaces and tabs around line feeds'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', 'Alpha \n\t\n  \tbravo.\n \n \n')),
       'Alpha bravo.',
       'should ignore subsequent collapsible line feeds'
     )
 
-    st.equal(toText(h('p', '\n')), '', 'should ignore a single line feed')
+    t.equal(toText(h('p', '\n')), '', 'should ignore a single line feed')
 
-    st.equal(
+    t.equal(
       toText(h('p', ' \u061C Alpha.\t\u200F ')),
       'Alpha.',
       'should ignore a bidi control characters'
     )
 
-    st.equal(
+    t.equal(
       toText(h('p', '\u200B \n Alpha\u200B \n\n\u200Bbravo\n\u200Bcharlie.')),
       '\u200BAlpha​\u200Bbravo\u200Bcharlie.',
       'should not collapse line feeds to a space if they’re surrounded by a zero width space'
@@ -243,17 +243,17 @@ test('hast-util-to-text', function(t) {
       'should support trim white-space before a `<br>` (#2)'
     )
 
-    st.end()
+    t.end()
   })
 
-  t.test('non-normal white-space', function(st) {
-    st.equal(
+  t.test('non-normal white-space', function (t) {
+    t.equal(
       toText(h('pre', ['\tAlpha \n\tbravo', h('br'), 'charlie()'])),
       '\tAlpha \n\tbravo\ncharlie()',
       'should support a `pre` element'
     )
 
-    st.equal(
+    t.equal(
       toText(
         h('pre', {wrap: true}, ['\tAlpha \n\tbravo', h('br'), 'charlie()'])
       ),
@@ -261,31 +261,31 @@ test('hast-util-to-text', function(t) {
       'should support `[wrap]` on a `pre` element'
     )
 
-    st.equal(
+    t.equal(
       toText(h('listing', '\tAlpha \n\tbravo.')),
       '\tAlpha \n\tbravo.',
       'should support a `listing` element'
     )
 
-    st.equal(
+    t.equal(
       toText(h('td', {noWrap: true}, '\tAlpha \n\tbravo.')),
       '\tAlpha \n\tbravo.',
       'should support `[nowrap]` on a `td` element'
     )
 
-    st.equal(
+    t.equal(
       toText(h('nobr', '\tAlpha \n\tbravo.')),
       '\tAlpha \n\tbravo.',
       'should support a `nobr` element'
     )
 
-    st.equal(
+    t.equal(
       toText(h('textarea', '\tDelta \n\techo\t\n')),
       '\tDelta \n\techo\t\n',
       'should support a `textarea` element'
     )
 
-    st.end()
+    t.end()
   })
 
   t.end()

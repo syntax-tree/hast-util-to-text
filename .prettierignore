@@ -1,3 +1,5 @@
 coverage/
 hast-util-to-text.js
 hast-util-to-text.min.js
+*.json
+*.md
