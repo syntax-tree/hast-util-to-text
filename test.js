@@ -51,6 +51,12 @@ test('hast-util-to-text', function (t) {
   )
 
   t.equal(
+    toText(h('div', [u('element', {tagName: 'dialog'})])),
+    '',
+    'should not fail on an element without `properties` (#1)'
+  )
+
+  t.equal(
     toText(h('p', 'Delta')),
     'Delta',
     'should stringify an element with nested text'

@@ -1,38 +1,86 @@
 'use strict'
 
 var repeat = require('repeat-string')
-var is = require('hast-util-is-element')
+var convert = require('hast-util-is-element/convert')
 var findAfter = require('unist-util-find-after')
 
 module.exports = toText
 
-// Methods.
-var min = Math.min
-var max = Math.max
+var searchLineFeeds = /\n/g
+var searchTabOrSpaces = /[\t ]+/g
 
-// White space codes.
-var tab = 0x9
-var space = 0x20
-var zeroWidthSpace = 0x200b
+var br = convert('br')
+var p = convert('p')
+var cell = convert(['th', 'td'])
+var row = convert('tr')
 
-// Bidi control characters codes.
-var alm = 0x61c
-var ltr = 0x200e
-var rtl = 0x200f
-var lre = 0x202a
-var rle = 0x202b
-var pdf = 0x202c
-var lro = 0x202d
-var rlo = 0x202e
-var lri = 0x2066
-var rli = 0x2067
-var fsi = 0x2068
-var pdi = 0x2069
+// Note that we don’t need to include void elements here as they don’t have text.
+// See: <https://github.com/wooorm/html-void-elements>
+var notRendered = convert([
+  // List from: <https://html.spec.whatwg.org/#hidden-elements>
+  'datalist',
+  'head',
+  'noembed',
+  'noframes',
+  'rp',
+  'script',
+  'style',
+  'template',
+  'title',
+  // Act as if we support scripting.
+  'noscript',
+  // Hidden attribute.
+  hidden,
+  // From: <https://html.spec.whatwg.org/#flow-content-3>
+  closedDialog
+])
 
-// Characters.
-var tabChar = '\t'
-var lineFeedChar = '\n'
-var spaceChar = ' '
+// See: <https://html.spec.whatwg.org/#the-css-user-agent-style-sheet-and-presentational-hints>
+var blockOrCaption = convert([
+  'caption', // `table-caption`
+  // Page
+  'html',
+  'body',
+  // Flow content
+  'address',
+  'blockquote',
+  'center', // Legacy
+  'dialog',
+  'div',
+  'figure',
+  'figcaption',
+  'footer',
+  'form,',
+  'header',
+  'hr',
+  'legend',
+  'listing', // Legacy
+  'main',
+  'p',
+  'plaintext', // Legacy
+  'pre',
+  'xmp', // Legacy
+  // Sections and headings
+  'article',
+  'aside',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'hgroup',
+  'nav',
+  'section',
+  // Lists
+  'dir', // Legacy
+  'dd',
+  'dl',
+  'dt',
+  'menu',
+  'ol',
+  'ul'
+])
 
 // Implementation of the `innerText` getter:
 // <https://html.spec.whatwg.org/#the-innertext-idl-attribute>
@@ -40,12 +88,10 @@ var spaceChar = ' '
 // CSS-supporting user agent.
 function toText(node) {
   var children = node.children || []
-  var length = children.length
   var block = blockOrCaption(node)
   var whiteSpace = inferWhiteSpace(node, {})
   var index = -1
   var results
-  var current
   var result
   var value
   var count
@@ -80,19 +126,20 @@ function toText(node) {
   results = []
 
   // 3.  For each child node node of this element:
-  while (++index < length) {
+  while (++index < children.length) {
     // 3.1. Let current be the list resulting in running the inner text
     //      collection steps with node.
     //      Each item in results will either be a JavaScript string or a
     //      positive integer (a required line break count).
-    current = innerTextCollection(children[index], index, node, {
-      whiteSpace: whiteSpace,
-      breakBefore: index === 0 ? block : false,
-      breakAfter: index === length - 1 ? block : is(children[index + 1], 'br')
-    })
-
     // 3.2. For each item item in current, append item to results.
-    results = results.concat(current)
+    results = results.concat(
+      innerTextCollection(children[index], index, node, {
+        whiteSpace: whiteSpace,
+        breakBefore: index ? null : block,
+        breakAfter:
+          index < children.length - 1 ? br(children[index + 1]) : block
+      })
+    )
   }
 
   // 4.  Remove any items from results that are the empty string.
@@ -103,21 +150,15 @@ function toText(node) {
   //     characters as the maximum of the values in the required line break
   //     count items.
   index = -1
-  length = results.length
   result = []
 
-  while (++index < length) {
+  while (++index < results.length) {
     value = results[index]
 
     if (typeof value === 'number') {
-      if (count !== undefined && value > count) {
-        count = value
-      }
-    } else if (value !== '') {
-      if (count) {
-        result.push(repeat(lineFeedChar, count))
-      }
-
+      if (count !== undefined && value > count) count = value
+    } else if (value) {
+      if (count) result.push(repeat('\n', count))
       count = 0
       result.push(value)
     }
@@ -145,14 +186,12 @@ function innerTextCollection(node, index, parent, options) {
 }
 
 // Collect an element.
-function collectElement(node, index, parent, options) {
+function collectElement(node, _, parent, options) {
   // First we infer the `white-space` property.
   var whiteSpace = inferWhiteSpace(node, options)
   var children = node.children || []
-  var length = children.length
-  var offset = -1
+  var index = -1
   var items = []
-  var current
   var prefix
   var suffix
 
@@ -178,8 +217,8 @@ function collectElement(node, index, parent, options) {
 
   // 5.  If node is a `<br>` element, then append a string containing a single
   //     U+000A LINE FEED (LF) character to items.
-  if (is(node, 'br')) {
-    suffix = lineFeedChar
+  if (br(node)) {
+    suffix = '\n'
   }
 
   // 7.  If node’s computed value of `display` is `table-row`, and node’s CSS
@@ -191,12 +230,12 @@ function collectElement(node, index, parent, options) {
   //     Note: needs further investigation as this does not account for implicit
   //     rows.
   else if (row(node) && findAfter(parent, node, row)) {
-    suffix = lineFeedChar
+    suffix = '\n'
   }
 
   // 8.  If node is a `<p>` element, then append 2 (a required line break count)
   //     at the beginning and end of items.
-  else if (is(node, 'p')) {
+  else if (p(node)) {
     prefix = 2
     suffix = 2
   }
@@ -212,15 +251,15 @@ function collectElement(node, index, parent, options) {
   // 1.  Let items be the result of running the inner text collection steps with
   //     each child node of node in tree order, and then concatenating the
   //     results to a single list.
-  while (++offset < length) {
-    current = innerTextCollection(children[offset], offset, node, {
-      whiteSpace: whiteSpace,
-      breakBefore: offset === 0 ? prefix : false,
-      breakAfter:
-        offset === length - 1 ? suffix : is(children[offset + 1], 'br')
-    })
-
-    items = items.concat(current)
+  while (++index < children.length) {
+    items = items.concat(
+      innerTextCollection(children[index], index, node, {
+        whiteSpace: whiteSpace,
+        breakBefore: index ? null : prefix,
+        breakAfter:
+          index < children.length - 1 ? br(children[index + 1]) : suffix
+      })
+    )
   }
 
   // 6.  If node’s computed value of `display` is `table-cell`, and node’s CSS
@@ -230,17 +269,12 @@ function collectElement(node, index, parent, options) {
   //
   //     See: <https://html.spec.whatwg.org/#tables-2>
   if (cell(node) && findAfter(parent, node, cell)) {
-    items.push(tabChar)
+    items.push('\t')
   }
 
   // Add the pre- and suffix.
-  if (prefix) {
-    items.unshift(prefix)
-  }
-
-  if (suffix) {
-    items.push(suffix)
-  }
+  if (prefix) items.unshift(prefix)
+  if (suffix) items.push(suffix)
 
   return items
 }
@@ -261,70 +295,54 @@ function collectElement(node, index, parent, options) {
 //
 // See: <https://drafts.csswg.org/css-text/#white-space-phase-1>
 function collectText(node, options) {
-  var breakBefore = options.breakBefore
-  var breakAfter = options.breakAfter
   var value = String(node.value)
-  var index = -1
-  var length = value.length
   var lines = []
   var result = []
-  var lineStart
-  var lineEnd
-  var line
-  var nextLine
-  var queue
+  var start = 0
+  var index = -1
+  var match
+  var end
+  var join
 
-  lineStart = 0
-  lineEnd = value.indexOf(lineFeedChar)
-  lineEnd = lineEnd === -1 ? value.length : lineEnd
+  while (start < value.length) {
+    searchLineFeeds.lastIndex = start
+    match = searchLineFeeds.exec(value)
+    end = match ? match.index : value.length
 
-  while (lineEnd !== -1) {
-    line = value.slice(lineStart, lineEnd)
+    lines.push(
+      // Any sequence of collapsible spaces and tabs immediately preceding or
+      // following a segment break is removed.
+      trimAndcollapseSpacesAndTabs(
+        // [...] ignoring bidi formatting characters (characters with the
+        // Bidi_Control property [UAX9]: ALM, LTR, RTL, LRE-RLO, LRI-PDI) as if
+        // they were not there.
+        value
+          .slice(start, end)
+          .replace(/[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, ''),
+        options.breakBefore,
+        options.breakAfter
+      )
+    )
 
-    // [...] ignoring bidi formatting characters (characters with the
-    // Bidi_Control property [UAX9]) as if they were not there.
-    line = removeBidiControlCharacters(line)
-
-    // Any sequence of collapsible spaces and tabs immediately preceding or
-    // following a segment break is removed.
-    line = trimAndcollapseSpacesAndTabs(line, breakBefore, breakAfter)
-
-    // Add the line.
-    lines.push(line)
-
-    // Stop.
-    if (lineEnd === value.length) {
-      break
-    }
-
-    lineStart = lineEnd + 1
-    lineEnd = value.indexOf(lineFeedChar, lineStart)
-    lineEnd = lineEnd === -1 ? value.length : lineEnd
+    start = end + 1
   }
-
-  index = -1
-  length = lines.length
-  queue = ''
 
   // Collapsible segment breaks are transformed for rendering according to the
   // segment break transformation rules.
   // So here we jump to 4.1.2 of [CSSTEXT]:
   // Any collapsible segment break immediately following another collapsible
   // segment break is removed
-  while (++index < length) {
-    line = lines[index]
-    nextLine = lines[index + 1] || ''
-
+  while (++index < lines.length) {
     // *   If the character immediately before or immediately after the segment
     //     break is the zero-width space character (U+200B), then the break is
     //     removed, leaving behind the zero-width space.
     if (
-      line.charCodeAt(line.length - 1) === zeroWidthSpace ||
-      nextLine.charCodeAt(0) === zeroWidthSpace
+      lines[index].charCodeAt(lines[index].length - 1) === 0x200b /* ZWSP */ ||
+      (index < lines.length - 1 &&
+        lines[index + 1].charCodeAt(0) === 0x200b) /* ZWSP */
     ) {
-      result.push(line)
-      queue = ''
-      continue
+      result.push(lines[index])
+      join = ''
     }
 
     // *   Otherwise, if the East Asian Width property [UAX11] of both the
@@ -333,7 +351,6 @@ function collectText(node, options) {
     //     segment break is removed.
     //
     //     Note: ignored.
-
     // *   Otherwise, if the writing system of the segment break is Chinese,
     //     Japanese, or Yi, and the character before or after the segment break
     //     is punctuation or a symbol (Unicode general category P* or S*) and
@@ -344,13 +361,10 @@ function collectText(node, options) {
     //     Note: ignored.
 
     // *   Otherwise, the segment break is converted to a space (U+0020).
-    if (line) {
-      if (queue) {
-        result.push(queue)
-      }
-
-      result.push(line)
-      queue = spaceChar
+    else if (lines[index]) {
+      if (join) result.push(join)
+      result.push(lines[index])
+      join = ' '
     }
   }
 
@@ -361,22 +375,6 @@ function collectPreText(node) {
   return String(node.value)
 }
 
-function removeBidiControlCharacters(value) {
-  var index = -1
-  var length = value.length
-  var result = ''
-
-  while (++index < length) {
-    if (isBidiControlCharacter(value.charCodeAt(index))) {
-      continue
-    }
-
-    result += value.charAt(index)
-  }
-
-  return result
-}
-
 // 3.  Every collapsible tab is converted to a collapsible space (U+0020).
 // 4.  Any collapsible space immediately following another collapsible
 //     space—even one outside the boundary of the inline containing that
@@ -384,64 +382,37 @@ function removeBidiControlCharacters(value) {
 //     context—is collapsed to have zero advance width. (It is invisible,
 //     but retains its soft wrap opportunity, if any.)
 function trimAndcollapseSpacesAndTabs(value, breakBefore, breakAfter) {
-  var start = 0
-  var end
-  var length = value.length
   var result = []
-  var char
+  var start = 0
+  var match
+  var end
 
-  // Move forward past initial white space.
-  while (start <= length) {
-    char = value.charCodeAt(start)
+  while (start < value.length) {
+    searchTabOrSpaces.lastIndex = start
+    match = searchTabOrSpaces.exec(value)
+    end = match ? match.index : value.length
 
-    if (char !== space && char !== tab) {
-      break
-    }
-
-    start++
-  }
-
-  // If we’re not directly after a segment break, but there was white space,
-  // add an empty value that will be turned into a space.
-  if (start !== 0 && !breakBefore) {
-    result.push('')
-  }
-
-  end = next(start - 1)
-
-  while (start < length) {
-    end = end === -1 ? length : end
-    result.push(value.slice(start, end))
-    start = end
-
-    while (start <= length) {
-      char = value.charCodeAt(start)
-
-      if (char !== space && char !== tab) {
-        break
-      }
-
-      start++
-    }
-
-    // If we reached the end, there was trailing white space, and there’s no
-    // segment break after this node, add an empty value that will be turned
-    // into a space.
-    if (start === length && start !== end && !breakAfter) {
+    // If we’re not directly after a segment break, but there was white space,
+    // add an empty value that will be turned into a space.
+    if (!start && !end && match && !breakBefore) {
       result.push('')
     }
 
-    end = next(start)
+    if (start !== end) {
+      result.push(value.slice(start, end))
+    }
+
+    start = match ? end + match[0].length : end
+  }
+
+  // If we reached the end, there was trailing white space, and there’s no
+  // segment break after this node, add an empty value that will be turned
+  // into a space.
+  if (start !== end && !breakAfter) {
+    result.push('')
   }
 
   return result.join(' ')
-
-  function next(index) {
-    var spaceIndex = value.indexOf(spaceChar, index + 1)
-    var tabIndex = value.indexOf(tabChar, index + 1)
-    var fn = spaceIndex === -1 || tabIndex === -1 ? max : min
-    return fn(spaceIndex, tabIndex)
-  }
 }
 
 // We don’t support void elements here (so `nobr wbr` -> `normal` is ignored).
@@ -468,107 +439,10 @@ function inferWhiteSpace(node, options) {
   }
 }
 
-function isBidiControlCharacter(char) {
-  switch (char) {
-    case alm:
-    case ltr:
-    case rtl:
-    case lre:
-    case rle:
-    case pdf:
-    case lro:
-    case rlo:
-    case lri:
-    case rli:
-    case fsi:
-    case pdi:
-      return true
-    default:
-      return false
-  }
+function hidden(node) {
+  return (node.properties || {}).hidden
 }
 
-function cell(node) {
-  return is(node, ['th', 'td'])
-}
-
-function row(node) {
-  return is(node, ['tr'])
-}
-
-// See: <https://html.spec.whatwg.org/#the-css-user-agent-style-sheet-and-presentational-hints>
-function blockOrCaption(node) {
-  return is(node, [
-    'caption', // `table-caption`
-    // Page
-    'html',
-    'body',
-    // Flow content
-    'address',
-    'blockquote',
-    'center', // Legacy
-    'dialog',
-    'div',
-    'figure',
-    'figcaption',
-    'footer',
-    'form,',
-    'header',
-    'hr',
-    'legend',
-    'listing', // Legacy
-    'main',
-    'p',
-    'plaintext', // Legacy
-    'pre',
-    'xmp', // Legacy
-    // Sections and headings
-    'article',
-    'aside',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'hgroup',
-    'nav',
-    'section',
-    // Lists
-    'dir', // Legacy
-    'dd',
-    'dl',
-    'dt',
-    'menu',
-    'ol',
-    'ul'
-  ])
-}
-
-// Note that we don’t need to include void elements here as they don’t have text.
-//
-// See: <https://github.com/wooorm/html-void-elements>
-function notRendered(node) {
-  var properties = node.properties || {}
-
-  return (
-    // List from: <https://html.spec.whatwg.org/#hidden-elements>
-    is(node, [
-      'datalist',
-      'head',
-      'noembed',
-      'noframes',
-      'rp',
-      'script',
-      'style',
-      'template',
-      'title',
-      // Act as if we support scripting.
-      'noscript'
-    ]) ||
-    // Hidden attribute.
-    properties.hidden ||
-    // From: <https://html.spec.whatwg.org/#flow-content-3>
-    (is(node, 'dialog') && !properties.open)
-  )
+function closedDialog(node) {
+  return node.tagName === 'dialog' && !(node.properties || {}).open
 }

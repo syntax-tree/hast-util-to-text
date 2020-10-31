@@ -73,7 +73,11 @@
     "esnext": false,
     "ignores": [
       "hast-util-to-text.js"
-    ]
+    ],
+    "rules": {
+      "unicorn/escape-case": "off",
+      "no-constant-condition": "off"
+    }
   },
   "remarkConfig": {
     "plugins": [
