@@ -29,7 +29,7 @@
     "index.js"
   ],
   "dependencies": {
-    "hast-util-is-element": "^1.0.0",
+    "hast-util-is-element": "^1.1.0",
     "repeat-string": "^1.0.0",
     "unist-util-find-after": "^3.0.0"
   },
