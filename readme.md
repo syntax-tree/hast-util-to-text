@@ -116,9 +116,9 @@ abide by its terms.
 
 <!-- Definitions -->
 
-[build-badge]: https://img.shields.io/travis/syntax-tree/hast-util-to-text.svg
+[build-badge]: https://github.com/syntax-tree/hast-util-to-text/workflows/main/badge.svg
 
-[build]: https://travis-ci.org/syntax-tree/hast-util-to-text
+[build]: https://github.com/syntax-tree/hast-util-to-text/actions
 
 [coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-util-to-text.svg
 
