@@ -22,13 +22,12 @@ var notRendered = convert([
   'head',
   'noembed',
   'noframes',
+  'noscript', // Act as if we support scripting.
   'rp',
   'script',
   'style',
   'template',
   'title',
-  // Act as if we support scripting.
-  'noscript',
   // Hidden attribute.
   hidden,
   // From: <https://html.spec.whatwg.org/#flow-content-3>
@@ -37,49 +36,45 @@ var notRendered = convert([
 
 // See: <https://html.spec.whatwg.org/#the-css-user-agent-style-sheet-and-presentational-hints>
 var blockOrCaption = convert([
+  'address', // Flow content
+  'article', // Sections and headings
+  'aside', // Sections and headings
+  'blockquote', // Flow content
+  'body', // Page
   'caption', // `table-caption`
-  // Page
-  'html',
-  'body',
-  // Flow content
-  'address',
-  'blockquote',
-  'center', // Legacy
-  'dialog',
-  'div',
-  'figure',
-  'figcaption',
-  'footer',
-  'form,',
-  'header',
-  'hr',
-  'legend',
-  'listing', // Legacy
-  'main',
-  'p',
-  'plaintext', // Legacy
-  'pre',
-  'xmp', // Legacy
-  // Sections and headings
-  'article',
-  'aside',
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'hgroup',
-  'nav',
-  'section',
-  // Lists
-  'dir', // Legacy
-  'dd',
-  'dl',
-  'dt',
-  'menu',
-  'ol',
-  'ul'
+  'center', // Flow content (legacy)
+  'dd', // Lists
+  'dialog', // Flow content
+  'dir', // Lists (legacy)
+  'dl', // Lists
+  'dt', // Lists
+  'div', // Flow content
+  'figure', // Flow content
+  'figcaption', // Flow content
+  'footer', // Flow content
+  'form,', // Flow content
+  'h1', // Sections and headings
+  'h2', // Sections and headings
+  'h3', // Sections and headings
+  'h4', // Sections and headings
+  'h5', // Sections and headings
+  'h6', // Sections and headings
+  'header', // Flow content
+  'hgroup', // Sections and headings
+  'hr', // Flow content
+  'html', // Page
+  'legend', // Flow content
+  'listing', // Flow content (legacy)
+  'main', // Flow content
+  'menu', // Lists
+  'nav', // Sections and headings
+  'ol', // Lists
+  'p', // Flow content
+  'plaintext', // Flow content (legacy)
+  'pre', // Flow content
+  'section', // Sections and headings
+  'ul', // Lists
+  'xmp' // Flow content (legacy)
 ])
 
 // Implementation of the `innerText` getter:
