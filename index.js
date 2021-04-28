@@ -1,3 +1,27 @@
+/**
+ * @typedef {import('hast-util-is-element').TestFunctionAnything} TestFunctionAnything
+ * @typedef {import('hast').Parent['children'][number]} HastChild
+ * @typedef {import('hast').Text} HastText
+ * @typedef {import('hast').Comment} HastComment
+ * @typedef {import('hast').Root} HastRoot
+ * @typedef {import('hast').Element} HastElement
+ * @typedef {import('hast').Properties} HastProperties
+ * @typedef {HastChild|HastRoot} HastNode
+ * @typedef {HastRoot|HastElement} HastParent
+ *
+ * @typedef {'normal'|'pre'|'nowrap'|'pre-wrap'} Whitespace
+ * @typedef {boolean} BreakValue
+ * @typedef {1|2} BreakNumber
+ * @typedef {'\n'} BreakForce
+ * @typedef {BreakValue|BreakNumber} BreakBefore
+ * @typedef {BreakValue|BreakNumber|BreakForce} BreakAfter
+ *
+ * @typedef CollectionOptions
+ * @property {Whitespace} whitespace
+ * @property {BreakBefore} breakBefore
+ * @property {BreakAfter} breakAfter
+ */
+
 import repeat from 'repeat-string'
 import {convertElement} from 'hast-util-is-element'
 import {findAfter} from 'unist-util-find-after'
@@ -73,18 +97,33 @@ var blockOrCaption = convertElement([
   'xmp' // Flow content (legacy)
 ])
 
-// Implementation of the `innerText` getter:
-// <https://html.spec.whatwg.org/#the-innertext-idl-attribute>
-// Note that we act as if `node` is being rendered, and as if we’re a
-// CSS-supporting user agent.
+/**
+ * Implementation of the `innerText` getter:
+ * <https://html.spec.whatwg.org/#the-innertext-idl-attribute>
+ * Note that we act as if `node` is being rendered, and as if we’re a
+ * CSS-supporting user agent.
+ *
+ * @param {HastNode} node
+ * @returns {string}
+ */
 export function toText(node) {
+  /** @type {Array.<HastChild>} */
+  // @ts-ignore looks like a parent.
   var children = node.children || []
   var block = blockOrCaption(node)
-  var whitespace = inferWhitespace(node, {})
+  var whitespace = inferWhitespace(node, {
+    whitespace: 'normal',
+    breakBefore: false,
+    breakAfter: false
+  })
   var index = -1
+  /** @type {Array.<string|BreakNumber>} */
   var results
+  /** @type {Array.<string>} */
   var result
+  /** @type {string|BreakNumber} */
   var value
+  /** @type {number} */
   var count
 
   // Treat `text` and `comment` as having normal white-space.
@@ -96,11 +135,7 @@ export function toText(node) {
   // Nodes without children are treated as a void element, so `doctype` is thus
   // ignored.
   if (node.type === 'text' || node.type === 'comment') {
-    return collectText(node, {
-      whitespace,
-      breakBefore: true,
-      breakAfter: true
-    })
+    return collectText(node, {whitespace, breakBefore: true, breakAfter: true})
   }
 
   // 1.  If this element is not being rendered, or if the user agent is a
@@ -124,7 +159,8 @@ export function toText(node) {
     //      positive integer (a required line break count).
     // 3.2. For each item item in current, append item to results.
     results = results.concat(
-      innerTextCollection(children[index], index, node, {
+      // @ts-ignore Looks like a parent.
+      innerTextCollection(children[index], node, {
         whitespace,
         breakBefore: index ? null : block,
         breakAfter:
@@ -159,31 +195,47 @@ export function toText(node) {
   return result.join('')
 }
 
-// <https://html.spec.whatwg.org/#inner-text-collection-steps>
-function innerTextCollection(node, index, parent, options) {
+/**
+ * <https://html.spec.whatwg.org/#inner-text-collection-steps>
+ *
+ * @param {HastNode} node
+ * @param {HastParent} parent
+ * @param {CollectionOptions} options
+ * @returns {Array.<string|BreakNumber>}
+ */
+function innerTextCollection(node, parent, options) {
   if (node.type === 'element') {
-    return collectElement(node, index, parent, options)
+    return collectElement(node, parent, options)
   }
 
   if (node.type === 'text') {
     return [
       options.whitespace === 'normal'
         ? collectText(node, options)
-        : collectPreText(node, options)
+        : collectPreText(node)
     ]
   }
 
   return []
 }
 
-// Collect an element.
-function collectElement(node, _, parent, options) {
+/**
+ * Collect an element.
+ *
+ * @param {HastElement} node
+ * @param {HastParent} parent
+ * @param {CollectionOptions} options
+ */
+function collectElement(node, parent, options) {
   // First we infer the `white-space` property.
   var whitespace = inferWhitespace(node, options)
   var children = node.children || []
   var index = -1
+  /** @type {Array.<string|BreakNumber>} */
   var items = []
+  /** @type {BreakNumber} */
   var prefix
+  /** @type {BreakNumber|BreakForce} */
   var suffix
 
   // We’re ignoring point 3, and exiting without any content here, because we
@@ -244,9 +296,9 @@ function collectElement(node, _, parent, options) {
   //     results to a single list.
   while (++index < children.length) {
     items = items.concat(
-      innerTextCollection(children[index], index, node, {
+      innerTextCollection(children[index], node, {
         whitespace,
-        breakBefore: index ? null : prefix,
+        breakBefore: index ? undefined : prefix,
         breakAfter:
           index < children.length - 1 ? br(children[index + 1]) : suffix
       })
@@ -270,29 +322,40 @@ function collectElement(node, _, parent, options) {
   return items
 }
 
-// 4.  If node is a Text node, then for each CSS text box produced by node,
-//     in content order, compute the text of the box after application of the
-//     CSS `white-space` processing rules and `text-transform` rules, set
-//     items to the list of the resulting strings, and return items.
-//     The CSS `white-space` processing rules are slightly modified:
-//     collapsible spaces at the end of lines are always collapsed, but they
-//     are only removed if the line is the last line of the block, or it ends
-//     with a br element.
-//     Soft hyphens should be preserved.
-//
-//     Note: See `collectText` and `collectPreText`.
-//     Note: we don’t deal with `text-transform`, no element has that by
-//     default.
-//
-// See: <https://drafts.csswg.org/css-text/#white-space-phase-1>
+/**
+ * 4.  If node is a Text node, then for each CSS text box produced by node,
+ *     in content order, compute the text of the box after application of the
+ *     CSS `white-space` processing rules and `text-transform` rules, set
+ *     items to the list of the resulting strings, and return items.
+ *     The CSS `white-space` processing rules are slightly modified:
+ *     collapsible spaces at the end of lines are always collapsed, but they
+ *     are only removed if the line is the last line of the block, or it ends
+ *     with a br element.
+ *     Soft hyphens should be preserved.
+ *
+ *     Note: See `collectText` and `collectPreText`.
+ *     Note: we don’t deal with `text-transform`, no element has that by
+ *     default.
+ *
+ * See: <https://drafts.csswg.org/css-text/#white-space-phase-1>
+ *
+ * @param {HastText|HastComment} node
+ * @param {CollectionOptions} options
+ * @returns {string}
+ */
 function collectText(node, options) {
   var value = String(node.value)
+  /** @type {Array.<string>} */
   var lines = []
+  /** @type {Array.<string>} */
   var result = []
   var start = 0
   var index = -1
+  /** @type {RegExpMatchArray} */
   var match
+  /** @type {number} */
   var end
+  /** @type {string} */
   var join
 
   while (start < value.length) {
@@ -303,7 +366,7 @@ function collectText(node, options) {
     lines.push(
       // Any sequence of collapsible spaces and tabs immediately preceding or
       // following a segment break is removed.
-      trimAndcollapseSpacesAndTabs(
+      trimAndCollapseSpacesAndTabs(
         // [...] ignoring bidi formatting characters (characters with the
         // Bidi_Control property [UAX9]: ALM, LTR, RTL, LRE-RLO, LRI-PDI) as if
         // they were not there.
@@ -362,20 +425,34 @@ function collectText(node, options) {
   return result.join('')
 }
 
+/**
+ * @param {HastText|HastComment} node
+ * @returns {string}
+ */
 function collectPreText(node) {
   return String(node.value)
 }
 
-// 3.  Every collapsible tab is converted to a collapsible space (U+0020).
-// 4.  Any collapsible space immediately following another collapsible
-//     space—even one outside the boundary of the inline containing that
-//     space, provided both spaces are within the same inline formatting
-//     context—is collapsed to have zero advance width. (It is invisible,
-//     but retains its soft wrap opportunity, if any.)
-function trimAndcollapseSpacesAndTabs(value, breakBefore, breakAfter) {
+/**
+ * 3.  Every collapsible tab is converted to a collapsible space (U+0020).
+ * 4.  Any collapsible space immediately following another collapsible
+ *     space—even one outside the boundary of the inline containing that
+ *     space, provided both spaces are within the same inline formatting
+ *     context—is collapsed to have zero advance width. (It is invisible,
+ *     but retains its soft wrap opportunity, if any.)
+ *
+ * @param {string} value
+ * @param {BreakBefore} breakBefore
+ * @param {BreakAfter} breakAfter
+ * @returns {string}
+ */
+function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
+  /** @type {Array.<string>} */
   var result = []
   var start = 0
+  /** @type {RegExpMatchArray} */
   var match
+  /** @type {number} */
   var end
 
   while (start < value.length) {
@@ -406,34 +483,46 @@ function trimAndcollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   return result.join(' ')
 }
 
-// We don’t support void elements here (so `nobr wbr` -> `normal` is ignored).
+/**
+ * We don’t support void elements here (so `nobr wbr` -> `normal` is ignored).
+ *
+ * @param {HastNode} node
+ * @param {CollectionOptions} options
+ * @returns {Whitespace}
+ */
 function inferWhitespace(node, options) {
-  var props = node.properties || {}
-  var inherit = options.whitespace || 'normal'
+  /** @type {HastProperties} */
+  var props
 
-  switch (node.tagName) {
-    case 'listing':
-    case 'plaintext':
-    case 'xmp':
-      return 'pre'
-    case 'nobr':
-      return 'nowrap'
-    case 'pre':
-      return props.wrap ? 'pre-wrap' : 'pre'
-    case 'td':
-    case 'th':
-      return props.noWrap ? 'nowrap' : inherit
-    case 'textarea':
-      return 'pre-wrap'
-    default:
-      return inherit
+  if (node.type === 'element') {
+    props = node.properties || {}
+    switch (node.tagName) {
+      case 'listing':
+      case 'plaintext':
+      case 'xmp':
+        return 'pre'
+      case 'nobr':
+        return 'nowrap'
+      case 'pre':
+        return props.wrap ? 'pre-wrap' : 'pre'
+      case 'td':
+      case 'th':
+        return props.noWrap ? 'nowrap' : options.whitespace
+      case 'textarea':
+        return 'pre-wrap'
+      default:
+    }
   }
+
+  return options.whitespace
 }
 
+/** @type {TestFunctionAnything} */
 function hidden(node) {
-  return (node.properties || {}).hidden
+  return Boolean((node.properties || {}).hidden)
 }
 
+/** @type {TestFunctionAnything} */
 function closedDialog(node) {
   return node.tagName === 'dialog' && !(node.properties || {}).open
 }
