@@ -20,6 +20,9 @@ breaks where `<br>` elements are used.
 
 ## Install
 
+This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
+Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
+
 [npm][]:
 
 ```sh
@@ -29,8 +32,8 @@ npm install hast-util-to-text
 ## Use
 
 ```js
-var h = require('hastscript')
-var toText = require('hast-util-to-text')
+import {h} from 'hastscript'
+import {toText} from 'hast-util-to-text'
 
 var tree = h('div', [
   h('h1', {hidden: true}, 'Alpha.'),
@@ -53,6 +56,9 @@ Delta echo foxtrot.
 ```
 
 ## API
+
+This package exports the following identifiers: `toText`.
+There is no default export.
 
 ### `toText(node)`
 

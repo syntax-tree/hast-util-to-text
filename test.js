@@ -1,9 +1,7 @@
-'use strict'
-
-var test = require('tape')
-var u = require('unist-builder')
-var h = require('hastscript')
-var toText = require('.')
+import test from 'tape'
+import {u} from 'unist-builder'
+import {h} from 'hastscript'
+import {toText} from './index.js'
 
 test('hast-util-to-text', function (t) {
   t.equal(

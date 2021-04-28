@@ -1,22 +1,18 @@
-'use strict'
-
-var repeat = require('repeat-string')
-var convert = require('hast-util-is-element/convert')
-var findAfter = require('unist-util-find-after')
-
-module.exports = toText
+import repeat from 'repeat-string'
+import {convertElement} from 'hast-util-is-element'
+import {findAfter} from 'unist-util-find-after'
 
 var searchLineFeeds = /\n/g
 var searchTabOrSpaces = /[\t ]+/g
 
-var br = convert('br')
-var p = convert('p')
-var cell = convert(['th', 'td'])
-var row = convert('tr')
+var br = convertElement('br')
+var p = convertElement('p')
+var cell = convertElement(['th', 'td'])
+var row = convertElement('tr')
 
 // Note that we don’t need to include void elements here as they don’t have text.
 // See: <https://github.com/wooorm/html-void-elements>
-var notRendered = convert([
+var notRendered = convertElement([
   // List from: <https://html.spec.whatwg.org/#hidden-elements>
   'datalist',
   'head',
@@ -35,7 +31,7 @@ var notRendered = convert([
 ])
 
 // See: <https://html.spec.whatwg.org/#the-css-user-agent-style-sheet-and-presentational-hints>
-var blockOrCaption = convert([
+var blockOrCaption = convertElement([
   'address', // Flow content
   'article', // Sections and headings
   'aside', // Sections and headings
@@ -81,10 +77,10 @@ var blockOrCaption = convert([
 // <https://html.spec.whatwg.org/#the-innertext-idl-attribute>
 // Note that we act as if `node` is being rendered, and as if we’re a
 // CSS-supporting user agent.
-function toText(node) {
+export function toText(node) {
   var children = node.children || []
   var block = blockOrCaption(node)
-  var whiteSpace = inferWhiteSpace(node, {})
+  var whitespace = inferWhitespace(node, {})
   var index = -1
   var results
   var result
@@ -101,7 +97,7 @@ function toText(node) {
   // ignored.
   if (node.type === 'text' || node.type === 'comment') {
     return collectText(node, {
-      whiteSpace: whiteSpace,
+      whitespace,
       breakBefore: true,
       breakAfter: true
     })
@@ -129,7 +125,7 @@ function toText(node) {
     // 3.2. For each item item in current, append item to results.
     results = results.concat(
       innerTextCollection(children[index], index, node, {
-        whiteSpace: whiteSpace,
+        whitespace,
         breakBefore: index ? null : block,
         breakAfter:
           index < children.length - 1 ? br(children[index + 1]) : block
@@ -171,7 +167,7 @@ function innerTextCollection(node, index, parent, options) {
 
   if (node.type === 'text') {
     return [
-      options.whiteSpace === 'normal'
+      options.whitespace === 'normal'
         ? collectText(node, options)
         : collectPreText(node, options)
     ]
@@ -183,7 +179,7 @@ function innerTextCollection(node, index, parent, options) {
 // Collect an element.
 function collectElement(node, _, parent, options) {
   // First we infer the `white-space` property.
-  var whiteSpace = inferWhiteSpace(node, options)
+  var whitespace = inferWhitespace(node, options)
   var children = node.children || []
   var index = -1
   var items = []
@@ -249,7 +245,7 @@ function collectElement(node, _, parent, options) {
   while (++index < children.length) {
     items = items.concat(
       innerTextCollection(children[index], index, node, {
-        whiteSpace: whiteSpace,
+        whitespace,
         breakBefore: index ? null : prefix,
         breakAfter:
           index < children.length - 1 ? br(children[index + 1]) : suffix
@@ -313,7 +309,7 @@ function collectText(node, options) {
         // they were not there.
         value
           .slice(start, end)
-          .replace(/[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, ''),
+          .replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, ''),
         options.breakBefore,
         options.breakAfter
       )
@@ -411,9 +407,9 @@ function trimAndcollapseSpacesAndTabs(value, breakBefore, breakAfter) {
 }
 
 // We don’t support void elements here (so `nobr wbr` -> `normal` is ignored).
-function inferWhiteSpace(node, options) {
+function inferWhitespace(node, options) {
   var props = node.properties || {}
-  var inherit = options.whiteSpace || 'normal'
+  var inherit = options.whitespace || 'normal'
 
   switch (node.tagName) {
     case 'listing':
