@@ -151,6 +151,12 @@ test('hast-util-to-text', function (t) {
     'should support white-space around elements'
   )
 
+  t.equal(
+    toText(h('div', ['alpha\n', h('span', 'bravo')])),
+    'alpha bravo',
+    'should turn new-lines before elements into spaces'
+  )
+
   t.test('normal white-space', function (t) {
     t.equal(
       toText(h('p', 'Alpha   bravo  charlie.')),
