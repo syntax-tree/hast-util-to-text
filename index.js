@@ -13,8 +13,8 @@
  * @typedef {boolean} BreakValue
  * @typedef {1|2} BreakNumber
  * @typedef {'\n'} BreakForce
- * @typedef {BreakValue|BreakNumber} BreakBefore
- * @typedef {BreakValue|BreakNumber|BreakForce} BreakAfter
+ * @typedef {BreakValue|BreakNumber|undefined} BreakBefore
+ * @typedef {BreakValue|BreakNumber|BreakForce|undefined} BreakAfter
  *
  * @typedef CollectionOptions
  * @property {Whitespace} whitespace
@@ -121,7 +121,7 @@ export function toText(node) {
   let results
   /** @type {string|BreakNumber} */
   let value
-  /** @type {number} */
+  /** @type {number|undefined} */
   let count
 
   // Treat `text` and `comment` as having normal white-space.
@@ -232,9 +232,9 @@ function collectElement(node, parent, options) {
   let index = -1
   /** @type {Array.<string|BreakNumber>} */
   let items = []
-  /** @type {BreakNumber} */
+  /** @type {BreakNumber|undefined} */
   let prefix
-  /** @type {BreakNumber|BreakForce} */
+  /** @type {BreakNumber|BreakForce|undefined} */
   let suffix
 
   // We’re ignoring point 3, and exiting without any content here, because we
@@ -350,16 +350,17 @@ function collectText(node, options) {
   const result = []
   let start = 0
   let index = -1
-  /** @type {RegExpMatchArray} */
+  /** @type {RegExpMatchArray|null} */
   let match
   /** @type {number} */
   let end
-  /** @type {string} */
+  /** @type {string|undefined} */
   let join
 
   while (start < value.length) {
     searchLineFeeds.lastIndex = start
     match = searchLineFeeds.exec(value)
+    // @ts-expect-error: `index` is set.
     end = match ? match.index : value.length
 
     lines.push(
@@ -449,7 +450,7 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   /** @type {Array.<string>} */
   const result = []
   let start = 0
-  /** @type {RegExpMatchArray} */
+  /** @type {RegExpMatchArray|null} */
   let match
   /** @type {number} */
   let end
@@ -457,6 +458,7 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   while (start < value.length) {
     searchTabOrSpaces.lastIndex = start
     match = searchTabOrSpaces.exec(value)
+    // @ts-expect-error: `index` is set.
     end = match ? match.index : value.length
 
     // If we’re not directly after a segment break, but there was white space,
@@ -475,6 +477,7 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   // If we reached the end, there was trailing white space, and there’s no
   // segment break after this node, add an empty value that will be turned
   // into a space.
+  // @ts-expect-error: `end` is defined.
   if (start !== end && !breakAfter) {
     result.push('')
   }
