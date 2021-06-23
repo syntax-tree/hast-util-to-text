@@ -3,7 +3,7 @@ import {u} from 'unist-builder'
 import {h} from 'hastscript'
 import {toText} from './index.js'
 
-test('hast-util-to-text', function (t) {
+test('hast-util-to-text', (t) => {
   t.equal(
     toText(u('doctype', {name: 'html'})),
     '',
@@ -151,7 +151,7 @@ test('hast-util-to-text', function (t) {
     'should support white-space around elements'
   )
 
-  t.test('normal white-space', function (t) {
+  t.test('normal white-space', (t) => {
     t.equal(
       toText(h('p', 'Alpha   bravo  charlie.')),
       'Alpha bravo charlie.',
@@ -253,7 +253,7 @@ test('hast-util-to-text', function (t) {
     t.end()
   })
 
-  t.test('non-normal white-space', function (t) {
+  t.test('non-normal white-space', (t) => {
     t.equal(
       toText(h('pre', ['\tAlpha \n\tbravo', h('br'), 'charlie()'])),
       '\tAlpha \n\tbravo\ncharlie()',

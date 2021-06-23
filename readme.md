@@ -35,7 +35,7 @@ npm install hast-util-to-text
 import {h} from 'hastscript'
 import {toText} from 'hast-util-to-text'
 
-var tree = h('div', [
+const tree = h('div', [
   h('h1', {hidden: true}, 'Alpha.'),
   h('article', [
     h('p', ['Bravo', h('br'), 'charlie.']),

@@ -26,17 +26,17 @@ import repeat from 'repeat-string'
 import {convertElement} from 'hast-util-is-element'
 import {findAfter} from 'unist-util-find-after'
 
-var searchLineFeeds = /\n/g
-var searchTabOrSpaces = /[\t ]+/g
+const searchLineFeeds = /\n/g
+const searchTabOrSpaces = /[\t ]+/g
 
-var br = convertElement('br')
-var p = convertElement('p')
-var cell = convertElement(['th', 'td'])
-var row = convertElement('tr')
+const br = convertElement('br')
+const p = convertElement('p')
+const cell = convertElement(['th', 'td'])
+const row = convertElement('tr')
 
 // Note that we don’t need to include void elements here as they don’t have text.
 // See: <https://github.com/wooorm/html-void-elements>
-var notRendered = convertElement([
+const notRendered = convertElement([
   // List from: <https://html.spec.whatwg.org/#hidden-elements>
   'datalist',
   'head',
@@ -55,7 +55,7 @@ var notRendered = convertElement([
 ])
 
 // See: <https://html.spec.whatwg.org/#the-css-user-agent-style-sheet-and-presentational-hints>
-var blockOrCaption = convertElement([
+const blockOrCaption = convertElement([
   'address', // Flow content
   'article', // Sections and headings
   'aside', // Sections and headings
@@ -109,22 +109,20 @@ var blockOrCaption = convertElement([
 export function toText(node) {
   /** @type {Array.<HastChild>} */
   // @ts-ignore looks like a parent.
-  var children = node.children || []
-  var block = blockOrCaption(node)
-  var whitespace = inferWhitespace(node, {
+  const children = node.children || []
+  const block = blockOrCaption(node)
+  const whitespace = inferWhitespace(node, {
     whitespace: 'normal',
     breakBefore: false,
     breakAfter: false
   })
-  var index = -1
+  let index = -1
   /** @type {Array.<string|BreakNumber>} */
-  var results
-  /** @type {Array.<string>} */
-  var result
+  let results
   /** @type {string|BreakNumber} */
-  var value
+  let value
   /** @type {number} */
-  var count
+  let count
 
   // Treat `text` and `comment` as having normal white-space.
   // This deviates from the spec as in the DOM the node’s `.data` has to be
@@ -177,7 +175,8 @@ export function toText(node) {
   //     characters as the maximum of the values in the required line break
   //     count items.
   index = -1
-  result = []
+  /** @type {Array.<string>} */
+  const result = []
 
   while (++index < results.length) {
     value = results[index]
@@ -228,15 +227,15 @@ function innerTextCollection(node, parent, options) {
  */
 function collectElement(node, parent, options) {
   // First we infer the `white-space` property.
-  var whitespace = inferWhitespace(node, options)
-  var children = node.children || []
-  var index = -1
+  const whitespace = inferWhitespace(node, options)
+  const children = node.children || []
+  let index = -1
   /** @type {Array.<string|BreakNumber>} */
-  var items = []
+  let items = []
   /** @type {BreakNumber} */
-  var prefix
+  let prefix
   /** @type {BreakNumber|BreakForce} */
-  var suffix
+  let suffix
 
   // We’re ignoring point 3, and exiting without any content here, because we
   // deviated from the spec in `toText` at step 3.
@@ -344,19 +343,19 @@ function collectElement(node, parent, options) {
  * @returns {string}
  */
 function collectText(node, options) {
-  var value = String(node.value)
+  const value = String(node.value)
   /** @type {Array.<string>} */
-  var lines = []
+  const lines = []
   /** @type {Array.<string>} */
-  var result = []
-  var start = 0
-  var index = -1
+  const result = []
+  let start = 0
+  let index = -1
   /** @type {RegExpMatchArray} */
-  var match
+  let match
   /** @type {number} */
-  var end
+  let end
   /** @type {string} */
-  var join
+  let join
 
   while (start < value.length) {
     searchLineFeeds.lastIndex = start
@@ -448,12 +447,12 @@ function collectPreText(node) {
  */
 function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   /** @type {Array.<string>} */
-  var result = []
-  var start = 0
+  const result = []
+  let start = 0
   /** @type {RegExpMatchArray} */
-  var match
+  let match
   /** @type {number} */
-  var end
+  let end
 
   while (start < value.length) {
     searchTabOrSpaces.lastIndex = start
@@ -492,7 +491,7 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
  */
 function inferWhitespace(node, options) {
   /** @type {HastProperties} */
-  var props
+  let props
 
   if (node.type === 'element') {
     props = node.properties || {}
