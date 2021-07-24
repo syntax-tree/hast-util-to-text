@@ -22,7 +22,6 @@
  * @property {BreakAfter} breakAfter
  */
 
-import repeat from 'repeat-string'
 import {convertElement} from 'hast-util-is-element'
 import {findAfter} from 'unist-util-find-after'
 
@@ -184,7 +183,7 @@ export function toText(node) {
     if (typeof value === 'number') {
       if (count !== undefined && value > count) count = value
     } else if (value) {
-      if (count) result.push(repeat('\n', count))
+      if (count) result.push('\n'.repeat(count))
       count = 0
       result.push(value)
     }
