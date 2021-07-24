@@ -390,9 +390,9 @@ function collectText(node, options) {
     //     break is the zero-width space character (U+200B), then the break is
     //     removed, leaving behind the zero-width space.
     if (
-      lines[index].charCodeAt(lines[index].length - 1) === 0x200b /* ZWSP */ ||
+      lines[index].charCodeAt(lines[index].length - 1) === 0x20_0b /* ZWSP */ ||
       (index < lines.length - 1 &&
-        lines[index + 1].charCodeAt(0) === 0x200b) /* ZWSP */
+        lines[index + 1].charCodeAt(0) === 0x20_0b) /* ZWSP */
     ) {
       result.push(lines[index])
       join = ''
