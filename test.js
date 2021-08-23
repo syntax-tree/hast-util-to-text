@@ -5,6 +5,30 @@ import {toText} from './index.js'
 
 test('hast-util-to-text', (t) => {
   t.equal(
+    toText(h('div', 'a\n  b\t\nc')),
+    'a b c',
+    'should default to `whitespace: normal`'
+  )
+
+  t.equal(
+    toText(h('div', 'a\n  b\t\nc'), {whitespace: 'pre'}),
+    'a\n  b\t\nc',
+    'should support `whitespace: pre`'
+  )
+
+  t.equal(
+    toText(h('div', 'a\n  b\t\nc'), {whitespace: 'pre-wrap'}),
+    'a\n  b\t\nc',
+    'should support `whitespace: pre-wrap`'
+  )
+
+  t.equal(
+    toText(h('div', 'a\n  b\t\nc'), {whitespace: 'nowrap'}),
+    'a\n  b\t\nc',
+    'should support `whitespace: nowrap`'
+  )
+
+  t.equal(
     toText(u('doctype', {name: 'html'})),
     '',
     'should ignore a given doctype'

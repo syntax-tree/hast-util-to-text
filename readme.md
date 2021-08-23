@@ -60,7 +60,7 @@ Delta echo foxtrot.
 This package exports the following identifiers: `toText`.
 There is no default export.
 
-### `toText(node)`
+### `toText(node, options?)`
 
 Utility to get the plain-text value of a [*node*][node].
 
@@ -70,9 +70,9 @@ Utility to get the plain-text value of a [*node*][node].
 *   If `node` is a [*root*][root] or [*element*][element], applies an algorithm
     similar to the `innerText` getter as defined by [HTML][]
 
-###### Parameters
+###### `options.whitespace`
 
-*   `node` ([`Node`][node]) — Thing to stringify
+Default whitespace setting to use (`'normal'` or `'pre'`, default: `'normal'`).
 
 ###### Returns
 

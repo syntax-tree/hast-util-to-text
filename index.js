@@ -20,6 +20,11 @@
  * @property {Whitespace} whitespace
  * @property {BreakBefore} breakBefore
  * @property {BreakAfter} breakAfter
+ *
+ * @typedef Options
+ *   Configuration.
+ * @property {Whitespace} [whitespace='normal']
+ *   Initial CSS whitespace setting to use.
  */
 
 import {convertElement} from 'hast-util-is-element'
@@ -103,15 +108,16 @@ const blockOrCaption = convertElement([
  * CSS-supporting user agent.
  *
  * @param {HastNode} node
+ * @param {Options} [options={}]
  * @returns {string}
  */
-export function toText(node) {
+export function toText(node, options = {}) {
   /** @type {Array.<HastChild>} */
   // @ts-ignore looks like a parent.
   const children = node.children || []
   const block = blockOrCaption(node)
   const whitespace = inferWhitespace(node, {
-    whitespace: 'normal',
+    whitespace: options.whitespace || 'normal',
     breakBefore: false,
     breakAfter: false
   })
