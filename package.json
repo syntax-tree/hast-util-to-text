@@ -69,7 +69,10 @@
     "trailingComma": "none"
   },
   "xo": {
-    "prettier": true
+    "prettier": true,
+    "rules": {
+      "unicorn/numeric-separators-style": "off"
+    }
   },
   "remarkConfig": {
     "plugins": [
