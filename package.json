@@ -1,6 +1,6 @@
 {
   "name": "hast-util-to-text",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "hast utility to get the plain-text value of a node according to the `innerText` algorithm",
   "license": "MIT",
   "keywords": [
