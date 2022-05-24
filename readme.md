@@ -8,25 +8,63 @@
 [![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-[**hast**][hast] utility to get the plain-text value of a [*node*][node].
+[hast][] utility to get the plain-text value of a node.
 
-This is like the DOMs `Node#innerText` getter but there are some deviations from
-the spec.
-The resulting text is returned.
+## Contents
 
-You’d typically want to use [`hast-util-to-string`][to-string]
-(`textContent`), but `hast-util-to-text` (`innerText`) adds for example line
-breaks where `<br>` elements are used.
+*   [What is this?](#what-is-this)
+*   [When should I use this?](#when-should-i-use-this)
+*   [Install](#install)
+*   [Use](#use)
+*   [API](#api)
+    *   [`toText(node, options?)`](#totextnode-options)
+*   [Types](#types)
+*   [Compatibility](#compatibility)
+*   [Security](#security)
+*   [Related](#related)
+*   [Contribute](#contribute)
+*   [License](#license)
+
+## What is this?
+
+This package is a utility that takes a [hast][] node takes its plain-text value.
+It is like the DOMs `Node#innerText`, which is a bitter nicer than
+`Node#textContent`, because this turns `<br>` elements into line breaks and
+uses `'\t'` (tabs) between table cells.
+
+There are some small deviations from the spec, because the DOM has knowledge of
+associated CSS, and can take into account that elements have `display: none` or
+`text-transform` association with them, and this utility can’t do that.
+
+## When should I use this?
+
+This is a small utility that is useful when you want a plain-text version of a
+node that is close to how it’s “visible” to users.
+
+This utility is similar to [`hast-util-to-string`][hast-util-to-string], which
+is simpler, and more like the `Node#textContent` algorithm discussed above.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
-Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
-
-[npm][]:
+This package is [ESM only][esm].
+In Node.js (version 12.20+, 14.14+, 16.0+, 18.0+), install with [npm][]:
 
 ```sh
 npm install hast-util-to-text
+```
+
+In Deno with [`esm.sh`][esmsh]:
+
+```js
+import {toText} from "https://esm.sh/hast-util-to-text@3"
+```
+
+In browsers with [`esm.sh`][esmsh]:
+
+```html
+<script type="module">
+  import {toText} from "https://esm.sh/hast-util-to-text@3?bundle"
+</script>
 ```
 
 ## Use
@@ -57,18 +95,22 @@ Delta echo foxtrot.
 
 ## API
 
-This package exports the following identifiers: `toText`.
+This package exports the identifier `toText`.
 There is no default export.
 
 ### `toText(node, options?)`
 
-Utility to get the plain-text value of a [*node*][node].
+Get the plain-text value of a node.
 
-*   If `node` is a [*comment*][comment], returns its `value`
-*   If `node` is a [*text*][text], applies normal white-space collapsing to its
+*   if `node` is a [comment][], returns its `value`
+*   if `node` is a [text][], applies normal white-space collapsing to its
     `value`, as defined by the [CSS Text][css] spec
-*   If `node` is a [*root*][root] or [*element*][element], applies an algorithm
-    similar to the `innerText` getter as defined by [HTML][]
+*   if `node` is a [root][] or [element][], applies an algorithm similar to the
+    `innerText` getter as defined by [HTML][]
+
+##### `options`
+
+Configuration (optional).
 
 ###### `options.whitespace`
 
@@ -76,21 +118,31 @@ Default whitespace setting to use (`'normal'` or `'pre'`, default: `'normal'`).
 
 ###### Returns
 
-`string` — Stringified `node`.
+Serialized `node` (`string`).
 
 ###### Notes
 
-*   If `node` is an [*element*][element] that is not displayed (such as a
-    `head`), we’ll still use the `innerText` algorithm instead of switching to
-    `textContent`
-*   If [*descendants*][descendant] of `node` are [*elements*][element] that are
-    not displayed, they are ignored
+*   if `node` is an element that is not displayed (such as a `head`), we’ll
+    still use the `innerText` algorithm instead of switching to `textContent`
+*   if descendants of `node` are elements that are not displayed, they are
+    ignored
 *   CSS is not considered, except for the default user agent style sheet
-*   A line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
+*   a line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
     or Halfwidth East Asian Width characters are used, the same goes for a case
     with Chinese, Japanese, or Yi writing systems
-*   Replaced [*elements*][element] (such as `audio`) are treated like
-    non-replaced *elements*
+*   replaced elements (such as `audio`) are treated like non-replaced elements
+
+## Types
+
+This package is fully typed with [TypeScript][].
+It exports the additional type `Options`.
+
+## Compatibility
+
+Projects maintained by the unified collective are compatible with all maintained
+versions of Node.js.
+As of now, that is Node.js 12.20+, 14.14+, 16.0+, and 18.0+.
+Our projects sometimes work with older versions, but this is not guaranteed.
 
 ## Security
 
@@ -99,17 +151,17 @@ openings for [cross-site scripting (XSS)][xss] attacks.
 
 ## Related
 
-*   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/HEAD/packages/hast-util-to-string)
+*   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string)
     — Get the plain-text value (`textContent`)
 *   [`hast-util-from-text`](https://github.com/syntax-tree/hast-util-from-text)
     — Set the plain-text value (`innerText`)
-*   [`hast-util-from-string`](https://github.com/rehypejs/rehype-minify/tree/HEAD/packages/hast-util-from-string)
+*   [`hast-util-from-string`](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-from-string)
     — Set the plain-text value (`textContent`)
 
 ## Contribute
 
-See [`contributing.md` in `syntax-tree/.github`][contributing] for ways to get
-started.
+See [`contributing.md`][contributing] in [`syntax-tree/.github`][health] for
+ways to get started.
 See [`support.md`][support] for ways to get help.
 
 This project has a [code of conduct][coc].
@@ -150,27 +202,31 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
+[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[esmsh]: https://esm.sh
+
+[typescript]: https://www.typescriptlang.org
+
 [license]: license
 
 [author]: https://wooorm.com
 
-[contributing]: https://github.com/syntax-tree/.github/blob/HEAD/contributing.md
+[health]: https://github.com/syntax-tree/.github
 
-[support]: https://github.com/syntax-tree/.github/blob/HEAD/support.md
+[contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
 
-[coc]: https://github.com/syntax-tree/.github/blob/HEAD/code-of-conduct.md
+[support]: https://github.com/syntax-tree/.github/blob/main/support.md
+
+[coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
 
 [html]: https://html.spec.whatwg.org/#the-innertext-idl-attribute
 
 [css]: https://drafts.csswg.org/css-text/#white-space-phase-1
 
-[to-string]: https://github.com/rehypejs/rehype-minify/tree/HEAD/packages/hast-util-to-string
-
-[descendant]: https://github.com/syntax-tree/unist#descendant
+[hast-util-to-string]: https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string
 
 [hast]: https://github.com/syntax-tree/hast
-
-[node]: https://github.com/syntax-tree/hast#nodes
 
 [root]: https://github.com/syntax-tree/hast#root
 
