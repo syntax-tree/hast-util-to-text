@@ -44,6 +44,10 @@ node that is close to how it’s “visible” to users.
 This utility is similar to [`hast-util-to-string`][hast-util-to-string], which
 is simpler, and more like the `Node#textContent` algorithm discussed above.
 
+There is also a package [`hast-util-from-text`][hast-util-from-text], which sort
+of does the inverse: it takes a string, sets that as text on the node, while
+turning line endings into `<br>`s
+
 ## Install
 
 This package is [ESM only][esm].
@@ -152,11 +156,11 @@ openings for [cross-site scripting (XSS)][xss] attacks.
 ## Related
 
 *   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string)
-    — Get the plain-text value (`textContent`)
+    — get the plain-text value (`textContent`)
 *   [`hast-util-from-text`](https://github.com/syntax-tree/hast-util-from-text)
-    — Set the plain-text value (`innerText`)
+    — set the plain-text value (`innerText`)
 *   [`hast-util-from-string`](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-from-string)
-    — Set the plain-text value (`textContent`)
+    — set the plain-text value (`textContent`)
 
 ## Contribute
 
@@ -225,6 +229,8 @@ abide by its terms.
 [css]: https://drafts.csswg.org/css-text/#white-space-phase-1
 
 [hast-util-to-string]: https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string
+
+[hast-util-from-text]: https://github.com/syntax-tree/hast-util-from-text
 
 [hast]: https://github.com/syntax-tree/hast
 
