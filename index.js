@@ -112,7 +112,7 @@ const blockOrCaption = convertElement([
  * @returns {string}
  */
 export function toText(node, options = {}) {
-  /** @type {Array.<HastChild>} */
+  /** @type {Array<HastChild>} */
   // @ts-ignore looks like a parent.
   const children = node.children || []
   const block = blockOrCaption(node)
@@ -122,7 +122,7 @@ export function toText(node, options = {}) {
     breakAfter: false
   })
   let index = -1
-  /** @type {Array.<string|BreakNumber>} */
+  /** @type {Array<string|BreakNumber>} */
   let results
   /** @type {string|BreakNumber} */
   let value
@@ -180,7 +180,7 @@ export function toText(node, options = {}) {
   //     characters as the maximum of the values in the required line break
   //     count items.
   index = -1
-  /** @type {Array.<string>} */
+  /** @type {Array<string>} */
   const result = []
 
   while (++index < results.length) {
@@ -205,7 +205,7 @@ export function toText(node, options = {}) {
  * @param {HastNode} node
  * @param {HastParent} parent
  * @param {CollectionOptions} options
- * @returns {Array.<string|BreakNumber>}
+ * @returns {Array<string|BreakNumber>}
  */
 function innerTextCollection(node, parent, options) {
   if (node.type === 'element') {
@@ -235,7 +235,7 @@ function collectElement(node, parent, options) {
   const whitespace = inferWhitespace(node, options)
   const children = node.children || []
   let index = -1
-  /** @type {Array.<string|BreakNumber>} */
+  /** @type {Array<string|BreakNumber>} */
   let items = []
   /** @type {BreakNumber|undefined} */
   let prefix
@@ -349,9 +349,9 @@ function collectElement(node, parent, options) {
  */
 function collectText(node, options) {
   const value = String(node.value)
-  /** @type {Array.<string>} */
+  /** @type {Array<string>} */
   const lines = []
-  /** @type {Array.<string>} */
+  /** @type {Array<string>} */
   const result = []
   let start = 0
   let index = -1
@@ -452,7 +452,7 @@ function collectPreText(node) {
  * @returns {string}
  */
 function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
-  /** @type {Array.<string>} */
+  /** @type {Array<string>} */
   const result = []
   let start = 0
   /** @type {RegExpMatchArray|null} */
