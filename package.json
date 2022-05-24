@@ -50,7 +50,7 @@
     "type-coverage": "^2.0.0",
     "typescript": "^4.0.0",
     "unist-builder": "^3.0.0",
-    "xo": "^0.45.0"
+    "xo": "^0.49.0"
   },
   "scripts": {
     "prepack": "npm run build && npm run format",
@@ -71,7 +71,8 @@
   "xo": {
     "prettier": true,
     "rules": {
-      "unicorn/numeric-separators-style": "off"
+      "unicorn/numeric-separators-style": "off",
+      "unicorn/prefer-code-point": "off"
     }
   },
   "remarkConfig": {
