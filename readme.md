@@ -27,7 +27,8 @@
 
 ## What is this?
 
-This package is a utility that takes a [hast][] node takes its plain-text value.
+This package is a utility that takes a [hast][] node and gets its plain-text
+value.
 It is like the DOMs `Node#innerText`, which is a bit nicer than
 `Node#textContent`, because this turns `<br>` elements into line breaks and
 uses `'\t'` (tabs) between table cells.
