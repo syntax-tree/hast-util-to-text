@@ -61,21 +61,21 @@ test('hast-util-to-text', (t) => {
   t.equal(toText(h('p')), '', 'should stringify an empty element')
 
   t.equal(
-    // @ts-ignore runtime.
+    // @ts-expect-error runtime.
     toText(u('element', {tagName: 'p'})),
     '',
     'should not fail on an element without `children` (#1)'
   )
 
   t.equal(
-    // @ts-ignore runtime.
+    // @ts-expect-error runtime.
     toText(h('div', [u('element', {tagName: 'p'})])),
     '',
     'should not fail on an element without `children` (#2)'
   )
 
   t.equal(
-    // @ts-ignore runtime.
+    // @ts-expect-error runtime.
     toText(h('div', [u('element', {tagName: 'dialog'})])),
     '',
     'should not fail on an element without `properties` (#1)'

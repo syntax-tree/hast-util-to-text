@@ -1,29 +1,42 @@
 /**
  * @typedef {import('hast-util-is-element').TestFunctionAnything} TestFunctionAnything
- * @typedef {import('hast').Parent['children'][number]} HastChild
- * @typedef {import('hast').Text} HastText
- * @typedef {import('hast').Comment} HastComment
- * @typedef {import('hast').Root} HastRoot
- * @typedef {import('hast').Element} HastElement
- * @typedef {import('hast').Properties} HastProperties
- * @typedef {HastChild|HastRoot} HastNode
- * @typedef {HastRoot|HastElement} HastParent
- *
- * @typedef {'normal'|'pre'|'nowrap'|'pre-wrap'} Whitespace
+ * @typedef {import('hast').Content} Content
+ * @typedef {import('hast').Text} Text
+ * @typedef {import('hast').Comment} Comment
+ * @typedef {import('hast').Root} Root
+ * @typedef {import('hast').Element} Element
+ */
+
+/**
+ * @typedef {Content | Root} Node
+ *   Any node.
+ * @typedef {Extract<Node, import('unist').Parent>} Parent
+ *   Any parent.
+ * @typedef {'normal' | 'pre' | 'nowrap' | 'pre-wrap'} Whitespace
+ *   Whitespace values (from CSS).
  * @typedef {boolean} BreakValue
- * @typedef {1|2} BreakNumber
+ *   Whether there was a break.
+ * @typedef {1 | 2} BreakNumber
+ *   Specific break.
  * @typedef {'\n'} BreakForce
- * @typedef {BreakValue|BreakNumber|undefined} BreakBefore
- * @typedef {BreakValue|BreakNumber|BreakForce|undefined} BreakAfter
+ *   Forced break.
+ * @typedef {BreakValue | BreakNumber | undefined} BreakBefore
+ *   Any value for a break before.
+ * @typedef {BreakValue | BreakNumber | BreakForce | undefined} BreakAfter
+ *   Any value for a break after.
  *
- * @typedef CollectionOptions
+ * @typedef CollectionInfo
+ *   Info on current collection.
  * @property {Whitespace} whitespace
+ *   Current whitespace setting.
  * @property {BreakBefore} breakBefore
+ *   Whether there was a break before.
  * @property {BreakAfter} breakAfter
+ *   Whether there was a break after.
  *
  * @typedef Options
  *   Configuration.
- * @property {Whitespace} [whitespace='normal']
+ * @property {Whitespace | null | undefined} [whitespace='normal']
  *   Initial CSS whitespace setting to use.
  */
 
@@ -102,32 +115,27 @@ const blockOrCaption = convertElement([
 ])
 
 /**
- * Implementation of the `innerText` getter:
- * <https://html.spec.whatwg.org/#the-innertext-idl-attribute>
- * Note that we act as if `node` is being rendered, and as if we’re a
- * CSS-supporting user agent.
+ * Implementation of the `innerText` getter.
  *
- * @param {HastNode} node
- * @param {Options} [options={}]
+ * See: <https://html.spec.whatwg.org/#the-innertext-idl-attribute>.
+ * Note that we act as if `node` is being rendered, and as if we’re a
+ * CSS-supporting user agent, with scripting enabled.
+ *
+ * @param {Node} tree
+ *   Tree to turn into text.
+ * @param {Options} [options]
+ *   Configuration (optional).
  * @returns {string}
+ *   Serialized `tree`.
  */
-export function toText(node, options = {}) {
-  /** @type {Array<HastChild>} */
-  // @ts-ignore looks like a parent.
-  const children = node.children || []
-  const block = blockOrCaption(node)
-  const whitespace = inferWhitespace(node, {
+export function toText(tree, options = {}) {
+  const children = 'children' in tree ? tree.children : []
+  const block = blockOrCaption(tree)
+  const whitespace = inferWhitespace(tree, {
     whitespace: options.whitespace || 'normal',
     breakBefore: false,
     breakAfter: false
   })
-  let index = -1
-  /** @type {Array<string|BreakNumber>} */
-  let results
-  /** @type {string|BreakNumber} */
-  let value
-  /** @type {number|undefined} */
-  let count
 
   // Treat `text` and `comment` as having normal white-space.
   // This deviates from the spec as in the DOM the node’s `.data` has to be
@@ -137,8 +145,8 @@ export function toText(node, options = {}) {
   // algorithm also works on a `root`).
   // Nodes without children are treated as a void element, so `doctype` is thus
   // ignored.
-  if (node.type === 'text' || node.type === 'comment') {
-    return collectText(node, {whitespace, breakBefore: true, breakAfter: true})
+  if (tree.type === 'text' || tree.type === 'comment') {
+    return collectText(tree, {whitespace, breakBefore: true, breakAfter: true})
   }
 
   // 1.  If this element is not being rendered, or if the user agent is a
@@ -152,7 +160,9 @@ export function toText(node, options = {}) {
   //     Important: we’ll have to account for this later though.
 
   // 2.  Let results be a new empty list.
-  results = []
+  /** @type {Array<string | BreakNumber>} */
+  let results = []
+  let index = -1
 
   // 3.  For each child node node of this element:
   while (++index < children.length) {
@@ -162,10 +172,10 @@ export function toText(node, options = {}) {
     //      positive integer (a required line break count).
     // 3.2. For each item item in current, append item to results.
     results = results.concat(
-      // @ts-ignore Looks like a parent.
-      innerTextCollection(children[index], node, {
+      // @ts-expect-error Looks like a parent.
+      innerTextCollection(children[index], tree, {
         whitespace,
-        breakBefore: index ? null : block,
+        breakBefore: index ? undefined : block,
         breakAfter:
           index < children.length - 1 ? br(children[index + 1]) : block
       })
@@ -179,12 +189,15 @@ export function toText(node, options = {}) {
   //     items with a string consisting of as many U+000A LINE FEED (LF)
   //     characters as the maximum of the values in the required line break
   //     count items.
-  index = -1
   /** @type {Array<string>} */
   const result = []
+  /** @type {number | undefined} */
+  let count
+
+  index = -1
 
   while (++index < results.length) {
-    value = results[index]
+    const value = results[index]
 
     if (typeof value === 'number') {
       if (count !== undefined && value > count) count = value
@@ -202,20 +215,20 @@ export function toText(node, options = {}) {
 /**
  * <https://html.spec.whatwg.org/#inner-text-collection-steps>
  *
- * @param {HastNode} node
- * @param {HastParent} parent
- * @param {CollectionOptions} options
- * @returns {Array<string|BreakNumber>}
+ * @param {Node} node
+ * @param {Parent} parent
+ * @param {CollectionInfo} info
+ * @returns {Array<string | BreakNumber>}
  */
-function innerTextCollection(node, parent, options) {
+function innerTextCollection(node, parent, info) {
   if (node.type === 'element') {
-    return collectElement(node, parent, options)
+    return collectElement(node, parent, info)
   }
 
   if (node.type === 'text') {
     return [
-      options.whitespace === 'normal'
-        ? collectText(node, options)
+      info.whitespace === 'normal'
+        ? collectText(node, info)
         : collectPreText(node)
     ]
   }
@@ -226,21 +239,17 @@ function innerTextCollection(node, parent, options) {
 /**
  * Collect an element.
  *
- * @param {HastElement} node
- * @param {HastParent} parent
- * @param {CollectionOptions} options
+ * @param {Element} node
+ * @param {Parent} parent
+ * @param {CollectionInfo} info
  */
-function collectElement(node, parent, options) {
+function collectElement(node, parent, info) {
   // First we infer the `white-space` property.
-  const whitespace = inferWhitespace(node, options)
+  const whitespace = inferWhitespace(node, info)
   const children = node.children || []
   let index = -1
-  /** @type {Array<string|BreakNumber>} */
+  /** @type {Array<string | BreakNumber>} */
   let items = []
-  /** @type {BreakNumber|undefined} */
-  let prefix
-  /** @type {BreakNumber|BreakForce|undefined} */
-  let suffix
 
   // We’re ignoring point 3, and exiting without any content here, because we
   // deviated from the spec in `toText` at step 3.
@@ -248,6 +257,10 @@ function collectElement(node, parent, options) {
     return items
   }
 
+  /** @type {BreakNumber | undefined} */
+  let prefix
+  /** @type {BreakNumber | BreakForce | undefined} */
+  let suffix
   // Note: we first detect if there is going to be a break before or after the
   // contents, as that changes the white-space handling.
 
@@ -343,30 +356,23 @@ function collectElement(node, parent, options) {
  *
  * See: <https://drafts.csswg.org/css-text/#white-space-phase-1>
  *
- * @param {HastText|HastComment} node
- * @param {CollectionOptions} options
+ * @param {Text | Comment} node
+ * @param {CollectionInfo} info
  * @returns {string}
  */
-function collectText(node, options) {
+function collectText(node, info) {
   const value = String(node.value)
   /** @type {Array<string>} */
   const lines = []
   /** @type {Array<string>} */
   const result = []
   let start = 0
-  let index = -1
-  /** @type {RegExpMatchArray|null} */
-  let match
-  /** @type {number} */
-  let end
-  /** @type {string|undefined} */
-  let join
 
   while (start < value.length) {
     searchLineFeeds.lastIndex = start
-    match = searchLineFeeds.exec(value)
-    // @ts-expect-error: `index` is set.
-    end = match ? match.index : value.length
+
+    const match = searchLineFeeds.exec(value)
+    const end = match && 'index' in match ? match.index : value.length
 
     lines.push(
       // Any sequence of collapsible spaces and tabs immediately preceding or
@@ -378,8 +384,8 @@ function collectText(node, options) {
         value
           .slice(start, end)
           .replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, ''),
-        options.breakBefore,
-        options.breakAfter
+        info.breakBefore,
+        info.breakAfter
       )
     )
 
@@ -391,6 +397,9 @@ function collectText(node, options) {
   // So here we jump to 4.1.2 of [CSSTEXT]:
   // Any collapsible segment break immediately following another collapsible
   // segment break is removed
+  let index = -1
+  let join = ''
+
   while (++index < lines.length) {
     // *   If the character immediately before or immediately after the segment
     //     break is the zero-width space character (U+200B), then the break is
@@ -431,7 +440,7 @@ function collectText(node, options) {
 }
 
 /**
- * @param {HastText|HastComment} node
+ * @param {Text | Comment} node
  * @returns {string}
  */
 function collectPreText(node) {
@@ -455,15 +464,12 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   /** @type {Array<string>} */
   const result = []
   let start = 0
-  /** @type {RegExpMatchArray|null} */
-  let match
-  /** @type {number} */
+  /** @type {number | undefined} */
   let end
 
   while (start < value.length) {
     searchTabOrSpaces.lastIndex = start
-    match = searchTabOrSpaces.exec(value)
-    // @ts-expect-error: `index` is set.
+    const match = searchTabOrSpaces.exec(value)
     end = match ? match.index : value.length
 
     // If we’re not directly after a segment break, but there was white space,
@@ -482,7 +488,6 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
   // If we reached the end, there was trailing white space, and there’s no
   // segment break after this node, add an empty value that will be turned
   // into a space.
-  // @ts-expect-error: `end` is defined.
   if (start !== end && !breakAfter) {
     result.push('')
   }
@@ -493,16 +498,13 @@ function trimAndCollapseSpacesAndTabs(value, breakBefore, breakAfter) {
 /**
  * We don’t support void elements here (so `nobr wbr` -> `normal` is ignored).
  *
- * @param {HastNode} node
- * @param {CollectionOptions} options
+ * @param {Node} node
+ * @param {CollectionInfo} info
  * @returns {Whitespace}
  */
-function inferWhitespace(node, options) {
-  /** @type {HastProperties} */
-  let props
-
+function inferWhitespace(node, info) {
   if (node.type === 'element') {
-    props = node.properties || {}
+    const props = node.properties || {}
     switch (node.tagName) {
       case 'listing':
       case 'plaintext':
@@ -520,7 +522,7 @@ function inferWhitespace(node, options) {
 
       case 'td':
       case 'th': {
-        return props.noWrap ? 'nowrap' : options.whitespace
+        return props.noWrap ? 'nowrap' : info.whitespace
       }
 
       case 'textarea': {
@@ -531,7 +533,7 @@ function inferWhitespace(node, options) {
     }
   }
 
-  return options.whitespace
+  return info.whitespace
 }
 
 /** @type {TestFunctionAnything} */
