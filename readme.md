@@ -17,7 +17,9 @@
 *   [Install](#install)
 *   [Use](#use)
 *   [API](#api)
-    *   [`toText(node, options?)`](#totextnode-options)
+    *   [`toText(tree[, options])`](#totexttree-options)
+    *   [`Options`](#options)
+    *   [`Whitespace`](#whitespace)
 *   [Types](#types)
 *   [Compatibility](#compatibility)
 *   [Security](#security)
@@ -52,7 +54,7 @@ turning line endings into `<br>`s
 ## Install
 
 This package is [ESM only][esm].
-In Node.js (version 12.20+, 14.14+, 16.0+, 18.0+), install with [npm][]:
+In Node.js (version 14.14+ or 16.0+), install with [npm][]:
 
 ```sh
 npm install hast-util-to-text
@@ -100,36 +102,40 @@ Delta echo foxtrot.
 
 ## API
 
-This package exports the identifier `toText`.
+This package exports the identifier [`toText`][totext].
 There is no default export.
 
-### `toText(node, options?)`
+### `toText(tree[, options])`
 
 Get the plain-text value of a node.
 
-*   if `node` is a [comment][], returns its `value`
-*   if `node` is a [text][], applies normal white-space collapsing to its
-    `value`, as defined by the [CSS Text][css] spec
-*   if `node` is a [root][] or [element][], applies an algorithm similar to the
-    `innerText` getter as defined by [HTML][]
+###### Parameters
 
-##### `options`
-
-Configuration (optional).
-
-###### `options.whitespace`
-
-Default whitespace setting to use (`'normal'` or `'pre'`, default: `'normal'`).
+*   `tree` ([`Node`][node])
+    — tree to turn into text
+*   `options` ([`Options`][options], optional)
+    — configuration
 
 ###### Returns
 
-Serialized `node` (`string`).
+Serialized `tree` (`string`).
+
+###### Algorithm
+
+*   if `tree` is a [comment][], returns its `value`
+*   if `tree` is a [text][], applies normal whitespace collapsing to its
+    `value`, as defined by the [CSS Text][css] spec
+*   if `tree` is a [root][] or [element][], applies an algorithm similar to the
+    `innerText` getter as defined by [HTML][]
 
 ###### Notes
 
-*   if `node` is an element that is not displayed (such as a `head`), we’ll
+> 👉 **Note**: the algorithm acts as if `tree` is being rendered, and as if
+> we’re a CSS-supporting user agent, with scripting enabled.
+
+*   if `tree` is an element that is not displayed (such as a `head`), we’ll
     still use the `innerText` algorithm instead of switching to `textContent`
-*   if descendants of `node` are elements that are not displayed, they are
+*   if descendants of `tree` are elements that are not displayed, they are
     ignored
 *   CSS is not considered, except for the default user agent style sheet
 *   a line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
@@ -137,16 +143,36 @@ Serialized `node` (`string`).
     with Chinese, Japanese, or Yi writing systems
 *   replaced elements (such as `audio`) are treated like non-replaced elements
 
+### `Options`
+
+Configuration (TypeScript type).
+
+##### Fields
+
+*   `whitespace` ([`Whitespace`][whitespace], default: `'normal'`)
+    — default whitespace setting to use
+
+### `Whitespace`
+
+Valid and useful whitespace values (from [CSS][]) (TypeScript type).
+
+##### Type
+
+```ts
+type Whitespace = 'normal' | 'pre' | 'nowrap' | 'pre-wrap'
+```
+
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports the additional type `Options`.
+It exports the additional types [`Options`][options] and
+[`Whitespace`][whitespace].
 
 ## Compatibility
 
 Projects maintained by the unified collective are compatible with all maintained
 versions of Node.js.
-As of now, that is Node.js 12.20+, 14.14+, 16.0+, and 18.0+.
+As of now, that is Node.js 14.14+ and 16.0+.
 Our projects sometimes work with older versions, but this is not guaranteed.
 
 ## Security
@@ -225,7 +251,7 @@ abide by its terms.
 
 [coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
 
-[html]: https://html.spec.whatwg.org/#the-innertext-idl-attribute
+[html]: https://html.spec.whatwg.org/multipage/dom.html#the-innertext-idl-attribute
 
 [css]: https://drafts.csswg.org/css-text/#white-space-phase-1
 
@@ -234,6 +260,8 @@ abide by its terms.
 [hast-util-from-text]: https://github.com/syntax-tree/hast-util-from-text
 
 [hast]: https://github.com/syntax-tree/hast
+
+[node]: https://github.com/syntax-tree/hast#nodes
 
 [root]: https://github.com/syntax-tree/hast#root
 
@@ -244,3 +272,9 @@ abide by its terms.
 [element]: https://github.com/syntax-tree/hast#element
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
+
+[totext]: #totexttree-options
+
+[options]: #options
+
+[whitespace]: #whitespace
