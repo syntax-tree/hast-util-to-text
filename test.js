@@ -319,3 +319,77 @@ test('non-normal white-space', () => {
     'should support a `textarea` element'
   )
 })
+
+test('more whitespace', () => {
+  assert.equal(
+    toText(h('p', ['A\n', h('span', 'b')])),
+    'A b',
+    'should support line endings around element breaks (1)'
+  )
+
+  assert.equal(
+    toText(h('p', ['A\nb', h('span', 'c')])),
+    'A bc',
+    'should support line endings around element breaks (2)'
+  )
+
+  assert.equal(
+    toText(h('p', ['A', h('span', '\nb')])),
+    'A b',
+    'should support line endings around element breaks (3)'
+  )
+
+  assert.equal(
+    toText(h('p', ['A\n', h('span', '\nb')])),
+    'A b',
+    'should support line endings around element breaks (4)'
+  )
+
+  assert.equal(
+    toText(h('p', [h('span', 'A\n'), h('span', 'b')])),
+    'A b',
+    'should support line endings around element breaks (5)'
+  )
+
+  assert.equal(
+    toText(h('p', [h('span', 'A'), h('span', '\nb')])),
+    'A b',
+    'should support line endings around element breaks (6)'
+  )
+
+  assert.equal(
+    toText(h('p', [h('span', 'A\n'), h('span', '\nb')])),
+    'A b',
+    'should support line endings around element breaks (7)'
+  )
+
+  assert.equal(
+    toText(h('p', [h('span', 'A\n'), 'b'])),
+    'A b',
+    'should support line endings around element breaks (8)'
+  )
+
+  assert.equal(
+    toText(h('p', [h('span', 'A'), '\nb'])),
+    'A b',
+    'should support line endings around element breaks (9)'
+  )
+
+  assert.equal(
+    toText(h('p', [h('span', 'A\n'), '\nb'])),
+    'A b',
+    'should support line endings around element breaks (10)'
+  )
+
+  assert.equal(
+    toText(h('div', [h('p', [h('span', 'A\n'), '\nb'])])),
+    'A b',
+    'should support line endings around element breaks (11)'
+  )
+
+  assert.equal(
+    toText(h('pre', ['A\n', h('span', 'b')])),
+    'A\nb',
+    'should support line endings around element breaks (12)'
+  )
+})
