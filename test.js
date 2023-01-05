@@ -3,8 +3,13 @@ import test from 'node:test'
 import {u} from 'unist-builder'
 import {h} from 'hastscript'
 import {toText} from './index.js'
+import * as mod from './index.js'
 
 test('toText', () => {
+  const api = Object.keys(mod)
+  assert.ok(api.includes('toText'), 'should expose `toText`')
+  assert.equal(api.length, 1, 'should expose the public api')
+
   assert.equal(
     toText(h('div', 'a\n  b\t\nc')),
     'a b c',
