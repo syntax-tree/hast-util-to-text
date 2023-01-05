@@ -506,17 +506,27 @@ function inferWhitespace(node, options) {
     switch (node.tagName) {
       case 'listing':
       case 'plaintext':
-      case 'xmp':
+      case 'xmp': {
         return 'pre'
-      case 'nobr':
+      }
+
+      case 'nobr': {
         return 'nowrap'
-      case 'pre':
+      }
+
+      case 'pre': {
         return props.wrap ? 'pre-wrap' : 'pre'
+      }
+
       case 'td':
-      case 'th':
+      case 'th': {
         return props.noWrap ? 'nowrap' : options.whitespace
-      case 'textarea':
+      }
+
+      case 'textarea': {
         return 'pre-wrap'
+      }
+
       default:
     }
   }
