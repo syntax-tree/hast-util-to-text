@@ -54,7 +54,7 @@ turning line endings into `<br>`s
 ## Install
 
 This package is [ESM only][esm].
-In Node.js (version 14.14+ or 16.0+), install with [npm][]:
+In Node.js (version 14.14+ and 16.0+), install with [npm][]:
 
 ```sh
 npm install hast-util-to-text
@@ -63,14 +63,14 @@ npm install hast-util-to-text
 In Deno with [`esm.sh`][esmsh]:
 
 ```js
-import {toText} from "https://esm.sh/hast-util-to-text@3"
+import {toText} from 'https://esm.sh/hast-util-to-text@3'
 ```
 
 In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import {toText} from "https://esm.sh/hast-util-to-text@3?bundle"
+  import {toText} from 'https://esm.sh/hast-util-to-text@3?bundle'
 </script>
 ```
 
