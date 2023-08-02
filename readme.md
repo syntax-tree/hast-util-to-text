@@ -63,14 +63,14 @@ npm install hast-util-to-text
 In Deno with [`esm.sh`][esmsh]:
 
 ```js
-import {toText} from 'https://esm.sh/hast-util-to-text@3'
+import {toText} from 'https://esm.sh/hast-util-to-text@4'
 ```
 
 In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import {toText} from 'https://esm.sh/hast-util-to-text@3?bundle'
+  import {toText} from 'https://esm.sh/hast-util-to-text@4?bundle'
 </script>
 ```
 
