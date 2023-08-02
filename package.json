@@ -82,7 +82,6 @@
   "xo": {
     "prettier": true,
     "rules": {
-      "unicorn/numeric-separators-style": "off",
       "unicorn/prefer-code-point": "off",
       "unicorn/prefer-string-replace-all": "off"
     }
