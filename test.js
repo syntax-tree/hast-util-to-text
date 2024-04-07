@@ -358,6 +358,13 @@ test('non-normal white-space', async function (t) {
       '\tDelta \n\techo\t\n'
     )
   })
+
+  await t.test('should support `li` elements', async function () {
+    assert.equal(
+      toText(h('ul', [h('li', 'Foxtrot'), h('li', 'Golf')])),
+      'Foxtrot\nGolf'
+    )
+  })
 })
 
 test('more whitespace', async function (t) {
