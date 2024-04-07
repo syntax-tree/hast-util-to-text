@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {h} from 'hastscript'
 import {toText} from 'hast-util-to-text'
-import {u} from 'unist-builder'
 
 test('toText', async function (t) {
   await t.test('should expose the public api', async function () {
@@ -37,23 +36,23 @@ test('toText', async function (t) {
   })
 
   await t.test('should ignore a given doctype', async function () {
-    assert.equal(toText(u('doctype', {name: 'html'})), '')
+    assert.equal(toText({type: 'doctype'}), '')
   })
 
   await t.test('should ignore a nested doctype', async function () {
-    assert.equal(toText(h('p', u('doctype', {name: 'html'}))), '')
+    assert.equal(toText(h('p', [{type: 'doctype'}])), '')
   })
 
   await t.test('should stringify a given comment', async function () {
-    assert.equal(toText(u('comment', 'Alpha')), 'Alpha')
+    assert.equal(toText({type: 'comment', value: 'Alpha'}), 'Alpha')
   })
 
   await t.test('should ignore a nested comment', async function () {
-    assert.equal(toText(h('p', u('comment', 'Bravo'))), '')
+    assert.equal(toText(h('p', [{type: 'comment', value: 'Bravo'}])), '')
   })
 
   await t.test('should stringify a given text', async function () {
-    assert.equal(toText(u('text', 'Charlie')), 'Charlie')
+    assert.equal(toText({type: 'comment', value: 'Charlie'}), 'Charlie')
   })
 
   await t.test('should stringify an empty element', async function () {
@@ -66,7 +65,7 @@ test('toText', async function (t) {
       assert.equal(
         toText(
           // @ts-expect-error: check how missing `children` is handled.
-          u('element', {tagName: 'p'})
+          {type: 'element', tagName: 'p'}
         ),
         ''
       )
@@ -79,7 +78,7 @@ test('toText', async function (t) {
       assert.equal(
         toText(
           // @ts-expect-error: check how missing `children` is handled.
-          h('div', [u('element', {tagName: 'p'})])
+          h('div', [{type: 'element', tagName: 'p'}])
         ),
         ''
       )
@@ -92,7 +91,7 @@ test('toText', async function (t) {
       assert.equal(
         toText(
           // @ts-expect-error: check how missing `properties` is handled.
-          h('div', [u('element', {tagName: 'dialog', children: []})])
+          h('div', [{type: 'element', tagName: 'dialog', children: []}])
         ),
         ''
       )
@@ -109,7 +108,7 @@ test('toText', async function (t) {
   await t.test(
     'should stringify a root with nested elements and text',
     async function () {
-      assert.equal(toText(u('root', [h('p', 'Echo')])), 'Echo')
+      assert.equal(toText({type: 'root', children: [h('p', 'Echo')]}), 'Echo')
     }
   )
 
