@@ -12,20 +12,20 @@
 
 ## Contents
 
-*   [What is this?](#what-is-this)
-*   [When should I use this?](#when-should-i-use-this)
-*   [Install](#install)
-*   [Use](#use)
-*   [API](#api)
-    *   [`toText(tree[, options])`](#totexttree-options)
-    *   [`Options`](#options)
-    *   [`Whitespace`](#whitespace)
-*   [Types](#types)
-*   [Compatibility](#compatibility)
-*   [Security](#security)
-*   [Related](#related)
-*   [Contribute](#contribute)
-*   [License](#license)
+* [What is this?](#what-is-this)
+* [When should I use this?](#when-should-i-use-this)
+* [Install](#install)
+* [Use](#use)
+* [API](#api)
+  * [`toText(tree[, options])`](#totexttree-options)
+  * [`Options`](#options)
+  * [`Whitespace`](#whitespace)
+* [Types](#types)
+* [Compatibility](#compatibility)
+* [Security](#security)
+* [Related](#related)
+* [Contribute](#contribute)
+* [License](#license)
 
 ## What is this?
 
@@ -111,10 +111,10 @@ Get the plain-text value of a node.
 
 ###### Parameters
 
-*   `tree` ([`Node`][node])
-    — tree to turn into text
-*   `options` ([`Options`][api-options], optional)
-    — configuration
+* `tree` ([`Node`][node])
+  — tree to turn into text
+* `options` ([`Options`][api-options], optional)
+  — configuration
 
 ###### Returns
 
@@ -122,26 +122,26 @@ Serialized `tree` (`string`).
 
 ###### Algorithm
 
-*   if `tree` is a [comment][], returns its `value`
-*   if `tree` is a [text][], applies normal whitespace collapsing to its
-    `value`, as defined by the [CSS Text][css] spec
-*   if `tree` is a [root][] or [element][], applies an algorithm similar to the
-    `innerText` getter as defined by [HTML][]
+* if `tree` is a [comment][], returns its `value`
+* if `tree` is a [text][], applies normal whitespace collapsing to its
+  `value`, as defined by the [CSS Text][css] spec
+* if `tree` is a [root][] or [element][], applies an algorithm similar to the
+  `innerText` getter as defined by [HTML][]
 
 ###### Notes
 
 > 👉 **Note**: the algorithm acts as if `tree` is being rendered, and as if
 > we’re a CSS-supporting user agent, with scripting enabled.
 
-*   if `tree` is an element that is not displayed (such as a `head`), we’ll
-    still use the `innerText` algorithm instead of switching to `textContent`
-*   if descendants of `tree` are elements that are not displayed, they are
-    ignored
-*   CSS is not considered, except for the default user agent style sheet
-*   a line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
-    or Halfwidth East Asian Width characters are used, the same goes for a case
-    with Chinese, Japanese, or Yi writing systems
-*   replaced elements (such as `audio`) are treated like non-replaced elements
+* if `tree` is an element that is not displayed (such as a `head`), we’ll
+  still use the `innerText` algorithm instead of switching to `textContent`
+* if descendants of `tree` are elements that are not displayed, they are
+  ignored
+* CSS is not considered, except for the default user agent style sheet
+* a line feed is collapsed instead of ignored in cases where Fullwidth, Wide,
+  or Halfwidth East Asian Width characters are used, the same goes for a case
+  with Chinese, Japanese, or Yi writing systems
+* replaced elements (such as `audio`) are treated like non-replaced elements
 
 ### `Options`
 
@@ -149,8 +149,8 @@ Configuration (TypeScript type).
 
 ##### Fields
 
-*   `whitespace` ([`Whitespace`][api-whitespace], default: `'normal'`)
-    — default whitespace setting to use
+* `whitespace` ([`Whitespace`][api-whitespace], default: `'normal'`)
+  — default whitespace setting to use
 
 ### `Whitespace`
 
@@ -185,12 +185,14 @@ openings for [cross-site scripting (XSS)][xss] attacks.
 
 ## Related
 
-*   [`hast-util-to-string`](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string)
-    — get the plain-text value (`textContent`)
-*   [`hast-util-from-text`](https://github.com/syntax-tree/hast-util-from-text)
-    — set the plain-text value (`innerText`)
-*   [`hast-util-from-string`](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-from-string)
-    — set the plain-text value (`textContent`)
+* [`hast-util-to-string`
+  ](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string)
+  — get the plain-text value (`textContent`)
+* [`hast-util-from-text`](https://github.com/syntax-tree/hast-util-from-text)
+  — set the plain-text value (`innerText`)
+* [`hast-util-from-string`
+  ](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-from-string)
+  — set the plain-text value (`textContent`)
 
 ## Contribute
 
