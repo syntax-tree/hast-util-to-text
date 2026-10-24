@@ -176,6 +176,109 @@ test('toText', async function (t) {
     }
   )
 
+  await t.test(
+    'should add line feeds between rows across table sections',
+    async function () {
+      assert.equal(
+        toText(
+          h('table', [
+            h('thead', [h('tr', [h('th', 'Oscar'), h('th', 'Papa')])]),
+            h('tbody', [h('tr', [h('td', 'Québec'), h('td', 'Romeo')])])
+          ])
+        ),
+        'Oscar\tPapa\nQuébec\tRomeo'
+      )
+    }
+  )
+
+  await t.test(
+    'should handle large tables without stack overflow',
+    async function () {
+      /** @param {number} i */
+      const row = (i) =>
+        h('tr', [h('td', 'a' + i), h('td', 'b' + i), h('td', 'c' + i)])
+      const count = 35_000
+      /** @type {Array<import('hast').Element>} */
+      const rows = []
+      let index = -1
+      while (++index < count) {
+        rows.push(row(index))
+      }
+
+      const table = h('table', h('tbody', rows))
+      const text = toText(table)
+      assert.equal(typeof text, 'string')
+      assert.ok(text.startsWith('a0\tb0\tc0\n'))
+      assert.ok(text.endsWith('a34999\tb34999\tc34999'))
+    }
+  )
+
+  await t.test(
+    'should add line feeds between rows when not in a table',
+    async function () {
+      assert.equal(
+        toText(h('tbody', [h('tr', 'Delta'), h('tr', 'Echo')])),
+        'Delta\nEcho'
+      )
+    }
+  )
+
+  await t.test('should support an empty table', async function () {
+    assert.equal(toText(h('table')), '')
+  })
+
+  await t.test(
+    'should ignore hidden rows when determining the last row of a table',
+    async function () {
+      assert.equal(
+        toText(
+          h('table', [
+            h('tbody', [h('tr', 'Foxtrot'), h('tr', {hidden: true}, 'Golf')])
+          ])
+        ),
+        'Foxtrot'
+      )
+    }
+  )
+
+  await t.test(
+    'should support tables nested in other elements',
+    async function () {
+      assert.equal(
+        toText(
+          h('div', [
+            h('table', [
+              h('thead', [h('tr', [h('th', 'Hotel')])]),
+              h('tbody', [h('tr', [h('td', 'India')])])
+            ])
+          ])
+        ),
+        'Hotel\nIndia'
+      )
+    }
+  )
+
+  await t.test(
+    'should not fail on a table without `children`',
+    async function () {
+      // @ts-expect-error: check how missing children are handled.
+      assert.equal(toText({type: 'element', tagName: 'table'}), '')
+    }
+  )
+
+  await t.test(
+    'should not fail on a table section without `children`',
+    async function () {
+      assert.equal(
+        toText(
+          // @ts-expect-error: check how missing children are handled.
+          h('table', [{type: 'element', tagName: 'tbody'}])
+        ),
+        ''
+      )
+    }
+  )
+
   await t.test('should add line feeds around a caption', async function () {
     assert.equal(
       toText(
