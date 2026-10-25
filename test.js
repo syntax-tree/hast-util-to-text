@@ -212,6 +212,28 @@ test('toText', async function (t) {
     }
   )
 
+  await t.test(
+    'should ignore white space between table parts',
+    async function () {
+      assert.equal(
+        toText(
+          h('table', [
+            '\n',
+            h('tbody', [
+              '\n',
+              h('tr', ['\n', h('td', 'a'), '\n', h('td', 'b'), '\n']),
+              '\n',
+              h('tr', 'c'),
+              '\n'
+            ]),
+            '\n'
+          ])
+        ),
+        'a\tb\nc'
+      )
+    }
+  )
+
   await t.test('should add line feeds around a caption', async function () {
     assert.equal(
       toText(
