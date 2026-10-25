@@ -93,7 +93,7 @@ console.log(toText(tree))
 
 Yields:
 
-```txt
+```text
 Bravo
 charlie.
 
@@ -185,10 +185,9 @@ openings for [cross-site scripting (XSS)][xss] attacks.
 
 ## Related
 
-* [`hast-util-to-string`
-  ](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string)
+* [`hast-util-to-string`][hast-util-to-string]
   — get the plain-text value (`textContent`)
-* [`hast-util-from-text`](https://github.com/syntax-tree/hast-util-from-text)
+* [`hast-util-from-text`][hast-util-from-text]
   — set the plain-text value (`innerText`)
 * [`hast-util-from-string`
   ](https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-from-string)
@@ -210,76 +209,76 @@ abide by its terms.
 
 <!-- Definitions -->
 
-[build-badge]: https://github.com/syntax-tree/hast-util-to-text/workflows/main/badge.svg
+[api-options]: #options
 
-[build]: https://github.com/syntax-tree/hast-util-to-text/actions
+[api-to-text]: #totexttree-options
 
-[coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-util-to-text.svg
+[api-whitespace]: #whitespace
 
-[coverage]: https://codecov.io/github/syntax-tree/hast-util-to-text
-
-[downloads-badge]: https://img.shields.io/npm/dm/hast-util-to-text.svg
-
-[downloads]: https://www.npmjs.com/package/hast-util-to-text
-
-[size-badge]: https://img.shields.io/badge/dynamic/json?label=minzipped%20size&query=$.size.compressedSize&url=https://deno.bundlejs.com/?q=hast-util-to-text
-
-[size]: https://bundlejs.com/?q=hast-util-to-text
-
-[sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
+[author]: https://wooorm.com
 
 [backers-badge]: https://opencollective.com/unified/backers/badge.svg
 
-[collective]: https://opencollective.com/unified
+[build]: https://github.com/syntax-tree/hast-util-to-text/actions
 
-[chat-badge]: https://img.shields.io/badge/chat-discussions-success.svg
+[build-badge]: https://github.com/syntax-tree/hast-util-to-text/workflows/main/badge.svg
 
 [chat]: https://github.com/syntax-tree/unist/discussions
 
-[npm]: https://docs.npmjs.com/cli/install
+[chat-badge]: https://img.shields.io/badge/chat-discussions-success.svg
+
+[coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
+
+[collective]: https://opencollective.com/unified
+
+[comment]: https://github.com/syntax-tree/hast#comment
+
+[contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
+
+[coverage]: https://codecov.io/github/syntax-tree/hast-util-to-text
+
+[coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/hast-util-to-text.svg
+
+[css]: https://drafts.csswg.org/css-text/#white-space-phase-1
+
+[downloads]: https://www.npmjs.com/package/hast-util-to-text
+
+[downloads-badge]: https://img.shields.io/npm/dm/hast-util-to-text.svg
+
+[element]: https://github.com/syntax-tree/hast#element
 
 [esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 [esmsh]: https://esm.sh
 
-[typescript]: https://www.typescriptlang.org
-
-[license]: license
-
-[author]: https://wooorm.com
-
-[health]: https://github.com/syntax-tree/.github
-
-[contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
-
-[support]: https://github.com/syntax-tree/.github/blob/main/support.md
-
-[coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
-
-[html]: https://html.spec.whatwg.org/multipage/dom.html#the-innertext-idl-attribute
-
-[css]: https://drafts.csswg.org/css-text/#white-space-phase-1
-
-[hast-util-to-string]: https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string
+[hast]: https://github.com/syntax-tree/hast
 
 [hast-util-from-text]: https://github.com/syntax-tree/hast-util-from-text
 
-[hast]: https://github.com/syntax-tree/hast
+[hast-util-to-string]: https://github.com/rehypejs/rehype-minify/tree/main/packages/hast-util-to-string
+
+[health]: https://github.com/syntax-tree/.github
+
+[html]: https://html.spec.whatwg.org/multipage/dom.html#the-innertext-idl-attribute
+
+[license]: license
 
 [node]: https://github.com/syntax-tree/hast#nodes
 
+[npm]: https://docs.npmjs.com/cli/install
+
 [root]: https://github.com/syntax-tree/hast#root
 
-[comment]: https://github.com/syntax-tree/hast#comment
+[size]: https://bundlejs.com/?q=hast-util-to-text
+
+[size-badge]: https://img.shields.io/badge/dynamic/json?label=minzipped%20size&query=$.size.compressedSize&url=https://deno.bundlejs.com/?q=hast-util-to-text
+
+[sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
+
+[support]: https://github.com/syntax-tree/.github/blob/main/support.md
 
 [text]: https://github.com/syntax-tree/hast#text
 
-[element]: https://github.com/syntax-tree/hast#element
+[typescript]: https://www.typescriptlang.org
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
-
-[api-to-text]: #totexttree-options
-
-[api-options]: #options
-
-[api-whitespace]: #whitespace
