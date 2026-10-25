@@ -55,6 +55,26 @@ test('toText', async function (t) {
     assert.equal(toText({type: 'comment', value: 'Charlie'}), 'Charlie')
   })
 
+  await t.test(
+    'should stringify a given text with many line endings',
+    async function () {
+      assert.equal(
+        toText({type: 'text', value: 'a\n'.repeat(200_000)}),
+        'a '.repeat(199_999) + 'a'
+      )
+    }
+  )
+
+  await t.test(
+    'should stringify a nested text with many line endings',
+    async function () {
+      assert.equal(
+        toText(h(undefined, h('div', 'a\n'.repeat(200_000)))),
+        'a '.repeat(199_999) + 'a'
+      )
+    }
+  )
+
   await t.test('should stringify an empty element', async function () {
     assert.equal(toText(h('p')), '')
   })
