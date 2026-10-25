@@ -196,6 +196,22 @@ test('toText', async function (t) {
     }
   )
 
+  await t.test(
+    'should add line feeds between rows in different sections',
+    async function () {
+      assert.equal(
+        toText(
+          h('table', [
+            h('thead', h('tr', 'a')),
+            h('tbody', h('tr', 'b')),
+            h('tfoot')
+          ])
+        ),
+        'a\nb'
+      )
+    }
+  )
+
   await t.test('should add line feeds around a caption', async function () {
     assert.equal(
       toText(
