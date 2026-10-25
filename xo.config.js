@@ -9,6 +9,7 @@ const xoConfig = [
     prettier: 'compat',
     rules: {
       '@typescript-eslint/no-shadow': 'off',
+      complexity: 'off',
       curly: 'off',
       'import-x/order': 'off',
       'jsdoc/check-indentation': 'off',
