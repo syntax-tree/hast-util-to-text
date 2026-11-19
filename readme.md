@@ -271,7 +271,7 @@ abide by its terms.
 
 [size]: https://bundlejs.com/?q=hast-util-to-text
 
-[size-badge]: https://img.shields.io/badge/dynamic/json?label=minzipped%20size&query=$.size.compressedSize&url=https://deno.bundlejs.com/?q=hast-util-to-text
+[size-badge]: https://img.shields.io/badge/dynamic/json?label=minzipped%20size\&query=$.size.compressedSize\&url=https://deno.bundlejs.com/?q=hast-util-to-text
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
