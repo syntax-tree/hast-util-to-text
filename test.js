@@ -369,6 +369,51 @@ test('normal white-space', async function (t) {
       assert.equal(toText(h('p', ['Delta.  ', h('br')])), 'Delta.\n')
     }
   )
+
+  await t.test(
+    'should support spaces around element breaks (1)',
+    async function () {
+      assert.equal(toText(h('p', ['a ', ' b'])), 'a b')
+    }
+  )
+
+  await t.test(
+    'should support spaces around element breaks (2)',
+    async function () {
+      assert.equal(toText(h('p', ['a ', h('b', ' b')])), 'a b')
+    }
+  )
+
+  await t.test(
+    'should support spaces around element breaks (3)',
+    async function () {
+      assert.equal(toText(h('p', [h('b', ' a ')])), 'a')
+    }
+  )
+
+  await t.test(
+    'should support spaces around element breaks (4)',
+    async function () {
+      assert.equal(toText(h('p', ['a ', h('br'), ' b'])), 'a\nb')
+    }
+  )
+
+  await t.test(
+    'should support spaces around element breaks (5)',
+    async function () {
+      assert.equal(toText(h('tr', [h('td', 'a '), h('td', ' b')])), 'a\tb')
+    }
+  )
+
+  await t.test(
+    'should support spaces around element breaks (6)',
+    async function () {
+      assert.equal(
+        toText(h('div', [h('p', 'a'), ' ', h('br'), 'b'])),
+        'a\n\n\nb'
+      )
+    }
+  )
 })
 
 test('non-normal white-space', async function (t) {
