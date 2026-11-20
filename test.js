@@ -414,6 +414,31 @@ test('normal white-space', async function (t) {
       )
     }
   )
+
+  await t.test('should keep a space in an inline element', async function () {
+    assert.equal(toText(h('code', ' ')), ' ')
+  })
+
+  await t.test(
+    'should keep spaces at the edges of an inline element',
+    async function () {
+      assert.equal(toText(h('code', ' a ')), ' a ')
+    }
+  )
+
+  await t.test(
+    'should not keep a space after a `<br>` at the end of an inline element',
+    async function () {
+      assert.equal(toText(h('span', ['a', h('br'), ' '])), 'a\n')
+    }
+  )
+
+  await t.test(
+    'should not keep line breaks at the edges of an inline element',
+    async function () {
+      assert.equal(toText(h('span', h('p', 'a'))), 'a')
+    }
+  )
 })
 
 test('non-normal white-space', async function (t) {
